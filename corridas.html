@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+<meta name="viewport"
+     content="width=device-width, initial-scale=1.0">
+
+  <title>
+    Histórico de Corridas
+  </title>
+
+  <link rel="icon"
+        type="image/x-icon"
+        href="favicon.ico">
+
+  <link rel="stylesheet"
+        href="css/style.css">
+
+  <link rel="stylesheet"
+        href="css/style-corridas.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <div class="logo">
+
+
+<img src="https://a.imagem.app/GYxzpt.png">
+
+
+  </div>
+
+  <ul class="nav-links">
+
+
+<li><a href="index.html">Home</a></li>
+
+<li><a href="equipe.html">Equipe</a></li>
+
+<li><a href="blacklist.html">Blacklist</a></li>
+
+<li><a href="hall.html">Hall da Fama</a></li>
+
+<li><a href="campeonatos.html">Campeonatos</a></li>
+
+<li><a href="sobre.html">Sobre</a></li>
+
+<li><a href="memorial.html">Memorial</a></li>
+
+<li><a href="painel.html">Painel</a></li>
+
+
+  </ul>
+
+</nav>
+
+<!-- HERO -->
+
+<section class="corridas-wrapper">
+
+  <div class="corridas-container">
+
+
+<div class="corridas-header">
+
+  <h1 class="glitch"
+      data-text="CORRIDAS">
+
+    HISTORICO DE CORRIDAS
+
+  </h1>
+
+  <p>
+
+    Todas as etapas registradas do campeonato
+
+  </p>
+
+</div>
+
+<!-- LISTA -->
+
+<div id="corridas-grid">
+
+</div>
+
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+  <div class="footer-line"></div>
+
+  <div class="footer-content">
+
+
+<p>
+  © 2026 CONTROL RACING
+</p>
+
+<span>
+  Equipe de Corrida de Servidores de GTARP
+</span>
+
+
+  </div>
+
+</footer>
+
+<div class="page-transition"></div>
+<script src="script.js"></script>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+/* LOAD */
+
+async function loadCorridas(){
+
+  const grid =
+  document.getElementById("corridas-grid");
+
+  const q = query(
+
+    collection(db, "corridas"),
+
+    orderBy("criadoEm", "desc")
+
+  );
+
+  const querySnapshot =
+  await getDocs(q);
+
+  querySnapshot.forEach((docSnap) => {
+
+    const corrida =
+    docSnap.data();
+
+    const card =
+    document.createElement("div");
+
+    card.classList.add("corrida-card");
+
+    let resultadosHTML = "";
+
+    corrida.resultados
+    .sort((a,b) => a.posicao - b.posicao)
+    .forEach((piloto) => {
+
+      resultadosHTML += `
+
+        <div class="resultado-row">
+
+          <span>
+            #${piloto.posicao}
+          </span>
+
+          <span>
+            ${piloto.nome}
+          </span>
+
+          <span>
+            ${piloto.pontos} PTS
+          </span>
+
+        </div>
+
+      `;
+
+    });
+
+    card.innerHTML = `
+
+      <div class="corrida-top">
+
+        <div>
+
+          <h2>
+            ${corrida.nome}
+          </h2>
+
+          <span>
+            ${corrida.pista}
+          </span>
+
+        </div>
+
+        <div class="corrida-date">
+
+          ${corrida.data}
+
+        </div>
+
+      </div>
+
+      <div class="corrida-results">
+
+        ${resultadosHTML}
+
+      </div>
+
+    `;
+
+    grid.appendChild(card);
+
+  });
+
+}
+
+loadCorridas();
+
+</script>
+
+</body>
+</html>

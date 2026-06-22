@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Editar Perfil - Control Racing</title>
+
+  <link rel="stylesheet"
+        href="css/style-editar.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- BG -->
+
+<div class="bg-image">
+
+  <img src="https://a.imagem.app/GYziVJ.png">
+
+</div>
+
+<div class="overlay"></div>
+
+<div class="hud-lines"></div>
+
+<!-- CONTAINER -->
+
+<section class="edit-wrapper">
+
+  <div class="edit-card">
+
+    <span class="system-text">
+
+      CONTROL RACING NETWORK
+
+    </span>
+
+    <h1>
+      EDITAR PERFIL
+    </h1>
+
+    <!-- FORM -->
+
+    <div class="input-group">
+
+      <label>Nome</label>
+
+      <input type="text"
+             id="nome">
+
+    </div>
+
+    <div class="input-group">
+
+      <label>Carro</label>
+
+      <input type="text"
+             id="carro">
+
+    </div>
+
+    <div class="input-group">
+
+      <label>Status</label>
+
+      <input type="text"
+             id="status">
+
+    </div>
+
+    <div class="input-group">
+
+      <label>Foto de Perfil (URL)</label>
+
+      <input type="text"
+             id="foto">
+
+    </div>
+
+    <div class="input-group">
+
+      <label>Foto do Card Blacklist (URL)</label>
+
+      <input type="text"
+             id="fotoBlacklist">
+
+    </div>
+
+    <div class="input-group">
+
+      <label>Foto do Carro (URL)</label>
+
+      <input type="text"
+             id="fotoCarro">
+
+    </div>
+
+    <div class="input-group">
+
+      <label>Melhor Pista #1</label>
+
+      <input type="text"
+            id="pista1">
+
+    </div>
+
+    <div class="input-group">
+
+      <label>Melhor Pista #2</label>
+
+      <input type="text"
+            id="pista2">
+
+    </div>
+
+    <div class="input-group">
+
+      <label>Melhor Pista #3</label>
+
+      <input type="text"
+            id="pista3">
+
+    </div>
+
+    <!-- BUTTONS -->
+
+    <div class="buttons">
+
+      <button id="saveBtn">
+
+        SALVAR
+
+      </button>
+
+      <a href="painel.html">
+
+        <button class="back-btn" >
+
+          VOLTAR
+
+        </button>
+
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+<div class="page-transition"></div>
+<script src="script.js"></script>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getAuth,
+  onAuthStateChanged
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+/* USER */
+
+onAuthStateChanged(auth, async (user) => {
+
+  if(user){
+
+    const uid = user.uid;
+
+    const docRef = doc(db, "usuarios", uid);
+
+    const docSnap = await getDoc(docRef);
+
+    if(docSnap.exists()){
+
+      const data = docSnap.data();
+
+      /* LOAD INPUTS */
+
+      document
+      .getElementById("nome")
+      .value = data.nome;
+
+      document
+      .getElementById("carro")
+      .value = data.carro;
+
+      document
+      .getElementById("status")
+      .value = data.status;
+
+      document
+      .getElementById("pista1")
+      .value = data.pista1 || "";
+
+      document
+      .getElementById("pista2")
+      .value = data.pista2 || "";
+
+      document
+      .getElementById("pista3")
+      .value = data.pista3 || "";
+
+      document
+      .getElementById("foto")
+      .value = data.foto  || "";
+
+      document
+      .getElementById("fotoCarro")
+      .value = data.fotoCarro  || "";
+
+      document
+      .getElementById("fotoBlacklist")
+      .value = data.fotoBlacklist  || "";
+
+      /* SAVE */
+
+      document
+      .getElementById("saveBtn")
+      .addEventListener("click", async () => {
+
+        await updateDoc(docRef, {
+
+          nome:
+          document.getElementById("nome").value,
+
+          carro:
+          document.getElementById("carro").value,
+
+          status:
+          document.getElementById("status").value,
+
+          pista1:
+          document.getElementById("pista1").value,
+
+          pista2:
+          document.getElementById("pista2").value,
+
+          pista3:
+          document.getElementById("pista3").value,
+
+          foto:
+          document.getElementById("foto").value,
+
+          fotoCarro:
+          document.getElementById("fotoCarro").value,
+
+          fotoBlacklist:
+          document.getElementById("fotoBlacklist").value
+
+        });
+
+        alert("Perfil atualizado!");
+
+      });
+
+    }
+
+  }else{
+
+    window.location.href = "login.html";
+
+  }
+
+});
+
+</script>
+
+
+</body>
+</html>

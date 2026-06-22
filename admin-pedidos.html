@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Pedidos - Control Racing</title>
+
+  <link rel="stylesheet" href="css/style-admin-pedidos.css">
+  <link rel="stylesheet" href="css/style.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png">
+
+  </div>
+
+    <!-- MENU -->
+  <ul class="nav-links">
+
+    <li><a href="painel.html">Painel</a></li>
+
+    <li><a href="caixa.html">Caixa</a></li>
+
+  </ul>
+
+</nav>
+
+<!-- PAGE -->
+
+<section class="page">
+
+  <div class="container">
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+      <h1>
+
+        ADMIN PEDIDOS
+
+      </h1>
+
+      <p>
+
+        gerenciamento de pedidos da equipe
+
+      </p>
+
+    </div>
+
+    <!-- CAIXA -->
+
+    <div class="caixa-card">
+
+      <span>
+
+        SALDO DO CAIXA
+
+      </span>
+
+      <strong id="saldoCaixa">
+
+        $0
+
+      </strong>
+
+    </div>
+
+    <div class="resumo-vendedores">
+
+      <div class="resumo-header">
+
+        <h2>
+          VALORES EM ABERTO POR VENDEDOR
+        </h2>
+
+        <span>
+          PEDIDOS PENDENTES
+        </span>
+
+      </div>
+
+      <div class="resumo-grid"
+          id="resumoVendedores">
+
+        <div class="empty">
+
+          CARREGANDO RESUMO...
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- PEDIDOS -->
+
+    <div class="pedidos-layout">
+
+      <section class="pedidos-section">
+
+        <div class="section-title">
+
+          <h2>PEDIDOS PENDENTES</h2>
+
+          <span id="countPendentes">0</span>
+
+        </div>
+
+        <div class="pedidos-grid"
+            id="pedidosPendentesGrid">
+
+          <div class="empty">
+
+            CARREGANDO PEDIDOS...
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="pedidos-section">
+
+        <div class="section-title">
+
+          <h2>PEDIDOS FINALIZADOS</h2>
+
+          <span id="countFinalizados">0</span>
+
+        </div>
+
+        <div class="pedidos-grid"
+            id="pedidosFinalizadosGrid">
+
+          <div class="empty">
+
+            CARREGANDO PEDIDOS...
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <div class="historico-btn-area">
+
+      <a href="historico-pedidos.html">
+
+        <button class="historico-btn">
+
+          VER HISTÓRICO COMPLETO
+
+        </button>
+
+      </a>
+
+    </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<div class="page-transition"></div>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getAuth,
+  onAuthStateChanged
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+
+  getFirestore,
+  collection,
+  getDocs,
+  orderBy,
+  query,
+  doc,
+  getDoc,
+  updateDoc,
+  increment,
+  setDoc,
+  addDoc
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+/* ELEMENT */
+
+const pedidosPendentesGrid =
+document.getElementById("pedidosPendentesGrid");
+
+const pedidosFinalizadosGrid =
+document.getElementById("pedidosFinalizadosGrid");
+
+const countPendentes =
+document.getElementById("countPendentes");
+
+const countFinalizados =
+document.getElementById("countFinalizados");
+
+const saldoCaixa =
+document.getElementById("saldoCaixa");
+
+const resumoVendedores =
+document.getElementById("resumoVendedores");
+
+let usuarioLogado = {};
+
+/* AUTH */
+
+onAuthStateChanged(auth, async(user) => {
+
+  if(!user){
+
+    window.location.href = "login.html";
+
+    return;
+
+  }
+
+  const userRef =
+  doc(db, "usuarios", user.uid);
+
+  const userSnap =
+  await getDoc(userRef);
+
+  if(!userSnap.exists()){
+
+    window.location.href = "painel.html";
+
+    return;
+
+  }
+
+  const data =
+  userSnap.data();
+
+  usuarioLogado = data;
+
+  /* PERMISSÃO */
+
+  const permitido =
+
+    (data.equipe === "Founder" &&
+     data.ordem === 1)
+
+     ||
+
+    (data.equipe === "Manager" &&
+     data.ordem === 2);
+
+  if(!permitido){
+
+    window.location.href = "painel.html";
+
+    return;
+
+  }
+
+  carregarCaixa();
+
+  carregarPedidos();
+
+});
+
+/* ========================= */
+/* CARREGAR CAIXA */
+/* ========================= */
+
+async function carregarCaixa(){
+
+  const caixaRef =
+  doc(db, "financeiro", "caixa");
+
+  const caixaSnap =
+  await getDoc(caixaRef);
+
+  if(!caixaSnap.exists()){
+
+    await setDoc(caixaRef, {
+
+      saldo:0
+
+    });
+
+    saldoCaixa.innerText = "$0";
+
+    return;
+
+  }
+
+  const data =
+  caixaSnap.data();
+
+  saldoCaixa.innerText =
+  "$" + Number(data.saldo || 0)
+  .toLocaleString("pt-BR");
+
+}
+
+/* ========================= */
+/* CARREGAR PEDIDOS */
+/* ========================= */
+
+async function carregarPedidos(){
+
+  pedidosPendentesGrid.innerHTML = `
+
+    <div class="empty">
+
+      CARREGANDO PEDIDOS...
+
+    </div>
+
+  `;
+
+  pedidosFinalizadosGrid.innerHTML = `
+
+    <div class="empty">
+
+      CARREGANDO PEDIDOS...
+
+    </div>
+
+  `;
+
+  const pedidosRef =
+  collection(db, "pedidos");
+
+  const q =
+  query(
+    pedidosRef,
+    orderBy("criadoEm", "desc")
+  );
+
+  const snapshot =
+  await getDocs(q);
+
+  pedidosPendentesGrid.innerHTML = "";
+
+  pedidosFinalizadosGrid.innerHTML = "";
+
+  let totalPendentes = 0;
+
+  let totalFinalizados = 0;
+
+  let resumoPorVendedor = {};
+
+  if(snapshot.empty){
+
+    pedidosPendentesGrid.innerHTML = `
+
+      <div class="empty">
+
+        NENHUM PEDIDO PENDENTE
+
+      </div>
+
+    `;
+
+    pedidosFinalizadosGrid.innerHTML = `
+
+      <div class="empty">
+
+        NENHUM PEDIDO FINALIZADO
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  let finalizadosHTML = "";
+
+  snapshot.forEach((docItem) => {
+
+    const pedido =
+    docItem.data();
+
+    const status =
+    String(pedido.status || "")
+    .toLowerCase()
+    .trim();
+
+    if(status === "pendente"){
+
+      const vendedor =
+      pedido.piloto || "Sem vendedor";
+
+      if(!resumoPorVendedor[vendedor]){
+
+        resumoPorVendedor[vendedor] = {
+
+          total:0,
+
+          quantidade:0
+
+        };
+
+      }
+
+      resumoPorVendedor[vendedor].total += Number(
+        pedido.valorLiquido || 0
+      );
+
+      resumoPorVendedor[vendedor].quantidade++;
+
+    }
+
+    const itens =
+    pedido.itens || {};
+
+    const aprovado =
+    status === "aprovado" ||
+    status === "confirmado";
+
+    const recusado =
+    status === "recusado" ||
+    status === "cancelado";
+
+    const statusClasse =
+    aprovado
+    ? "aprovado"
+    : recusado
+    ? "recusado"
+    : "pendente";
+
+    const statusTexto =
+    aprovado
+    ? "APROVADO"
+    : recusado
+    ? "RECUSADO"
+    : "PENDENTE";
+
+    const cardHTML = `
+
+      <div class="pedido-card">
+
+        <div class="pedido-top">
+
+          <div class="pedido-top-left">
+
+            <h2>
+
+              ${pedido.piloto || "Piloto"}
+
+            </h2>
+
+            <span>
+
+              👤 ${pedido.cliente || "Não informado"}
+
+            </span>
+
+            <span>
+
+              📊 ${pedido.tipoVenda || "N/A"}
+              •
+              🕒 ${
+                pedido.data
+                ||
+                new Date(
+                  pedido.criadoEm
+                ).toLocaleString("pt-BR")
+              }
+
+            </span>
+
+          </div>
+
+          <div class="status ${statusClasse}">
+
+            ${statusTexto}
+
+          </div>
+
+        </div>
+
+        <div class="itens-grid">
+
+          <div class="item-box">
+
+            <span>TABLETS</span>
+
+            <strong>${itens.tablet || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>CINTOS</span>
+
+            <strong>${itens.cinto || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>FLIPPERS</span>
+
+            <strong>${itens.flipper || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>PENDRIVES</span>
+
+            <strong>${itens.pendrive || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>PLACAS</span>
+
+            <strong>${itens.placa || 0}</strong>
+
+          </div>
+
+        </div>
+
+        <div class="pedido-bottom">
+
+          <div class="valor">
+
+            <span>VALOR LIQUIDO</span>
+
+            <strong>
+
+              $${Number(
+                pedido.valorLiquido || 0
+              ).toLocaleString("pt-BR")}
+
+            </strong>
+
+          </div>
+
+          ${
+            status === "pendente"
+
+            ?
+
+            `
+
+            <div class="actions">
+
+              <button
+              class="approve-btn"
+              onclick="aprovarPedido('${docItem.id}')">
+
+                APROVAR
+
+              </button>
+
+              <button
+              class="reject-btn"
+              onclick="recusarPedido('${docItem.id}')">
+
+                RECUSAR
+
+              </button>
+
+            </div>
+
+            `
+
+            :
+
+            `
+
+            <div class="pedido-finalizado ${statusClasse}">
+
+              ${
+                aprovado
+                ? "PEDIDO APROVADO"
+                : "PEDIDO RECUSADO"
+              }
+
+            </div>
+
+            `
+          }
+
+        </div>
+
+      </div>
+
+    `;
+
+    if(status === "pendente"){
+
+      totalPendentes++;
+
+      pedidosPendentesGrid.innerHTML += cardHTML;
+
+    }else{
+
+      totalFinalizados++;
+
+      if(totalFinalizados <= 10){
+
+        finalizadosHTML += cardHTML;
+
+      }
+
+    }
+
+  });
+
+  countPendentes.innerText =
+  totalPendentes;
+
+  countFinalizados.innerText =
+  totalFinalizados;
+
+  pedidosFinalizadosGrid.innerHTML =
+  finalizadosHTML;
+
+  if(totalPendentes === 0){
+
+    pedidosPendentesGrid.innerHTML = `
+
+      <div class="empty">
+
+        NENHUM PEDIDO PENDENTE
+
+      </div>
+
+    `;
+
+  }
+
+  if(totalFinalizados === 0){
+
+    pedidosFinalizadosGrid.innerHTML = `
+
+      <div class="empty">
+
+        NENHUM PEDIDO FINALIZADO
+
+      </div>
+
+    `;
+
+  }
+
+  renderResumoVendedores(
+  resumoPorVendedor
+  );
+
+}
+
+/* ========================= */
+/* Fim da carrecar pedidos - Inicio da Resumo Vendedor*/
+/* ========================= */
+
+function renderResumoVendedores(resumo){
+
+  const vendedores =
+  Object.entries(resumo)
+  .sort((a,b) => b[1].total - a[1].total);
+
+  resumoVendedores.innerHTML = "";
+
+  if(vendedores.length === 0){
+
+    resumoVendedores.innerHTML = `
+
+      <div class="empty">
+
+        NENHUM VALOR EM ABERTO
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  vendedores.forEach(([nome, dados]) => {
+
+    resumoVendedores.innerHTML += `
+
+      <div class="vendedor-resumo-card">
+
+        <div>
+
+          <h3>
+
+            ${nome}
+
+          </h3>
+
+          <span>
+
+            ${dados.quantidade} pedido(s) pendente(s)
+
+          </span>
+
+        </div>
+
+        <strong>
+
+          $${dados.total.toLocaleString("pt-BR")}
+
+        </strong>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+let usuario = {};
+/* ========================= */
+/* APROVAR */
+/* ========================= */
+
+window.aprovarPedido =
+async(id) => {
+
+  const pedidoRef =
+  doc(db, "pedidos", id);
+
+  const pedidoSnap =
+  await getDoc(pedidoRef);
+
+  if(!pedidoSnap.exists()) return;
+
+  const pedido =
+  pedidoSnap.data();
+
+  /* EVITA DUPLICAR */
+
+  if(pedido.status === "aprovado"){
+
+    alert("Pedido já aprovado.");
+
+    return;
+
+  }
+
+  /* APROVA */
+
+  await updateDoc(pedidoRef, {
+
+    status:"aprovado"
+
+  });
+
+  /* SOMA AO CAIXA */
+
+  const caixaRef =
+  doc(db, "financeiro", "caixa");
+
+  await updateDoc(caixaRef, {
+
+    saldo: increment(
+      Number(pedido.valorLiquido || 0)
+    )
+
+  });
+
+  /* HISTÓRICO */
+
+  await addDoc(
+
+    collection(
+      db,
+      "financeiro",
+      "historico",
+      "movimentacoes"
+    ),
+
+    {
+
+      tipo:"entrada",
+
+      valor:Number(pedido.valorLiquido || 0),
+
+      motivo:
+      `Pedido aprovado - ${pedido.piloto}`,
+
+      responsavel:
+      usuarioLogado.nome,
+
+      data:new Date()
+      .toLocaleString("pt-BR"),
+
+      timestamp:Date.now()
+
+    }
+
+  );
+
+  carregarCaixa();
+
+  carregarPedidos();
+
+};
+
+/* ========================= */
+/* RECUSAR PEDIDO*/
+/* ========================= */
+
+window.recusarPedido =
+async(id) => {
+
+  const pedidoRef =
+  doc(db, "pedidos", id);
+
+  await updateDoc(pedidoRef, {
+
+    status:"recusado"
+
+  });
+
+  carregarPedidos();
+
+};
+
+</script>
+
+<script src="script.js"></script>
+
+</body>
+</html>

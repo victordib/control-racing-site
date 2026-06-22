@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Panel - Control Racing</title>
+
+  <link rel="stylesheet"
+        href="css/style-admin.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- BG -->
+
+<div class="bg-image">
+
+  <img src="https://a.imagem.app/GYziVJ.png">
+
+</div>
+
+<div class="overlay"></div>
+
+<div class="hud-lines"></div>
+
+<!-- ADMIN -->
+
+<section class="admin-wrapper">
+
+  <div class="admin-card">
+
+    <!-- HEADER -->
+
+    <div class="admin-header">
+
+      <div>
+
+        <span class="system-text">
+
+          CONTROL RACING NETWORK
+
+        </span>
+
+        <h1>
+          ADMIN PANEL
+        </h1>
+
+      </div>
+
+      <button class="back-btn"
+              id="back-panel-btn">
+
+        VOLTAR
+
+      </button>
+
+      <button class="back-btn"
+        onclick="document.querySelector('.page-transition').classList.add('active');
+        setTimeout(() => {
+        window.location.href='admin-playoffs.html';
+        }, 450);">
+
+          ADMIN PLAYOFFS
+
+    </button>
+
+    </div>
+
+
+
+    <!-- USERS -->
+
+    <div id="users-container"></div>
+
+          <!-- INSCRIÇÕES -->
+
+      <div class="admin-section">
+
+        <h2>
+          INSCRIÇÕES DO CAMPEONATO
+        </h2>
+
+          <button id="toggleInscricoesBtn">
+
+            CARREGANDO...
+
+          </button>
+
+        </div>
+
+        <div id="inscricoes-container"></div>
+
+
+    
+          <!-- CRIADOR DE CORRIDAS -->
+
+      <div class="admin-section race-builder">
+
+        <h2>
+          CRIAR CORRIDA
+        </h2>
+
+        <input type="text"
+            id="raceNome"
+            placeholder="Nome da corrida">
+
+        <input type="text"
+            id="racePista"
+            placeholder="Pista">
+
+        <input type="date"
+            id="raceData">
+
+        <!-- PILOTOS -->
+
+        <div id="racePilotsContainer"></div>
+
+        <button id="addPilotBtn"
+            class="save-btn">
+
+           ADICIONAR PILOTOS
+
+        </button>
+
+        <button id="saveRaceBtn" >
+
+         SALVAR CORRIDA
+
+        </button>
+
+      </div>
+
+      <div class="admin-section reset-section">
+
+        <h2>
+
+          RESET DE COLETAS
+
+        </h2>
+
+        <p>
+
+          Remove todas as coletas registradas
+          e reinicia o ranking.
+
+        </p>
+
+        <button id="resetColetasBtn"
+                class="danger-btn">
+
+          RESETAR COLETAS
+
+        </button>
+
+      </div>
+
+
+  </div>
+
+</section>
+
+<div class="page-transition"></div>
+
+<!-- FIREBASE -->
+<script src="script.js"></script>
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getAuth,
+  onAuthStateChanged
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  getDoc,
+  addDoc,
+  setDoc,
+  deleteDoc,
+  query,
+  onSnapshot,
+  orderBy
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+/* AUTH */
+
+onAuthStateChanged(auth, async (user) => {
+
+  if(user){
+
+    /* USER DOC */
+
+    const userRef =
+    doc(db, "usuarios", user.uid);
+
+    const userSnap =
+    await getDoc(userRef);
+
+    if(!userSnap.exists()){
+
+      window.location.href = "painel.html";
+
+      return;
+
+    }
+
+    const userData = userSnap.data();
+
+    /* ADMIN CHECK */
+
+    if(userData.admin !== true){
+
+      window.location.href = "painel.html";
+
+      return;
+
+    }
+
+    /* LOAD USERS */
+
+    loadUsers();
+
+    loadPedidos();
+
+    loadInscricoes();
+
+  }else{
+
+    window.location.href = "login.html";
+
+  }
+
+});
+
+/* LOAD USERS */
+
+async function loadUsers(){
+
+  const container =
+  document.getElementById("users-container");
+
+  container.innerHTML = "";
+
+  const querySnapshot =
+  await getDocs(collection(db, "usuarios"));
+
+  querySnapshot.forEach((docSnap) => {
+
+    const data = docSnap.data();
+
+    const userId = docSnap.id;
+
+    const card = document.createElement("div");
+
+    card.classList.add("user-card");
+
+    card.innerHTML = `
+
+      <div class="user-top">
+
+        <img src="${data.foto}">
+
+        <div>
+
+          <h2>${data.nome}</h2>
+
+          <span>#${data.rank}</span>
+
+        </div>
+
+      </div>
+
+      <div class="user-fields">
+
+        <input type="text"
+               value="${data.carro}"
+               id="carro-${userId}">
+
+        <input type="text"
+               value="${data.equipe}"
+               id="equipe-${userId}">
+
+        <input type="text"
+               value="${data.status}"
+               id="status-${userId}">
+
+        <input type="number"
+               value="${data.rank}"
+               id="rank-${userId}">
+
+        <label class="visible-toggle">
+
+        <input type="checkbox"
+              id="visivel-${userId}"
+              ${data.visivel ? "checked" : ""}>
+
+          VISIVEL NO SITE
+
+        </label>
+
+      </div>
+
+      <button class="save-btn"
+              onclick="saveUser('${userId}')">
+
+        SALVAR
+
+      </button>
+
+    `;
+
+    container.appendChild(card);
+
+  });
+
+}
+
+/* SAVE */
+
+window.saveUser = async (uid) => {
+
+  const userRef =
+  doc(db, "usuarios", uid);
+
+  /* VALUES */
+
+  const carroValue =
+  document.getElementById(`carro-${uid}`).value;
+
+  const equipeValue =
+  document.getElementById(`equipe-${uid}`).value;
+
+  const statusValue =
+  document.getElementById(`status-${uid}`).value;
+
+  const rankValue =
+  parseInt(
+    document.getElementById(`rank-${uid}`).value
+  );
+
+  /* ORDEM */
+
+  let ordem = 4;
+
+  if(equipeValue === "Founder"){
+
+    ordem = 1;
+
+  }
+
+  else if(equipeValue === "Manager"){
+
+    ordem = 2;
+
+  }
+
+  else if(equipeValue === "Crew Aux"){
+
+    ordem = 3;
+
+  }
+
+  else if(equipeValue === "Member"){
+
+    ordem = 4;
+
+  }
+
+  /* UPDATE */
+
+  await updateDoc(userRef, {
+
+    carro: carroValue,
+
+    equipe: equipeValue,
+
+    status: statusValue,
+
+    rank: rankValue,
+
+    ordem: ordem,
+
+    visivel:
+    document.getElementById(`visivel-${uid}`).checked
+
+  });
+
+  alert("Usuário atualizado!");
+
+};
+
+/* ========================= */
+/* LOAD INSCRIÇÕES */
+/* ========================= */
+
+async function loadInscricoes(){
+
+  const container =
+  document.getElementById("inscricoes-container");
+
+  container.innerHTML = "";
+
+  const querySnapshot =
+  await getDocs(collection(db, "inscricoes"));
+
+  if(querySnapshot.empty){
+
+    container.innerHTML = `
+
+      <div class="empty-state">
+
+        Nenhuma inscrição encontrada.
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  querySnapshot.forEach((docSnap) => {
+
+    const data = docSnap.data();
+
+    const inscricaoId =
+    docSnap.id;
+
+    const card =
+    document.createElement("div");
+
+    card.classList.add("inscricao-card");
+
+    card.innerHTML = `
+
+      <div class="inscricao-top">
+
+        <div>
+
+          <h3>
+            ${data.tabletNome}
+          </h3>
+
+          <span>
+            ${data.carro}
+          </span>
+        </div>
+
+      </div>
+
+      <div class="inscricao-footer">
+
+        <small>
+          ${new Date(data.criadoEm)
+            .toLocaleString("pt-BR")}
+        </small>
+
+        <button
+          class="save-btn"
+          onclick="deleteInscricao('${inscricaoId}')">
+
+          REMOVER
+
+        </button>
+
+      </div>
+
+    `;
+
+    container.appendChild(card);
+
+  });
+
+}
+
+/* DELETE INSCRIÇÃO */
+
+window.deleteInscricao =
+async (id) => {
+
+  const confirmar =
+  confirm("Deseja remover esta inscrição?");
+
+  if(!confirmar) return;
+
+  await deleteDoc(
+    doc(db, "inscricoes", id)
+  );
+
+  loadInscricoes();
+
+};
+
+/* ========================= /
+/ CRIADOR DE CORRIDAS /
+/ ========================= */
+
+let pilotosCache = [];
+
+/* LOAD PILOTOS */
+
+async function carregarPilotos(){
+
+const querySnapshot =
+await getDocs(collection(db, "usuarios"));
+
+pilotosCache = [];
+
+querySnapshot.forEach((docSnap) => {
+
+const data = docSnap.data();
+
+pilotosCache.push({
+
+  uid: docSnap.id,
+
+  nome: data.nome,
+
+  foto: data.foto
+
+});
+
+});
+
+}
+
+/* ADD PILOTO */
+
+document
+.getElementById("addPilotBtn")
+.addEventListener("click", () => {
+
+const container =
+document.getElementById("racePilotsContainer");
+
+const row =
+document.createElement("div");
+
+row.classList.add("race-pilot-row");
+
+let options = "";
+
+pilotosCache.forEach((piloto) => {
+
+options += `
+
+  <option
+    value="${piloto.uid}">
+
+    ${piloto.nome}
+
+  </option>
+
+`;
+
+});
+
+row.innerHTML = `
+
+<select class="pilotSelect">
+
+  ${options}
+
+</select>
+
+<input type="number"
+       class="pilotPosicao"
+       placeholder="Pos">
+
+<input type="number"
+       class="pilotPontos"
+       placeholder="PTS">
+
+`;
+
+container.appendChild(row);
+
+});
+
+/* SAVE RACE */
+
+document
+.getElementById("saveRaceBtn")
+.addEventListener("click", async () => {
+
+const nome =
+document.getElementById("raceNome").value;
+
+const pista =
+document.getElementById("racePista").value;
+
+const data =
+document.getElementById("raceData").value;
+
+const rows =
+document.querySelectorAll(".race-pilot-row");
+
+const resultados = [];
+
+rows.forEach((row) => {
+
+const uid =
+row.querySelector(".pilotSelect").value;
+
+const piloto =
+pilotosCache.find(p => p.uid === uid);
+
+resultados.push({
+
+  uid: uid,
+
+  nome: piloto.nome,
+
+  foto: piloto.foto,
+
+  posicao: parseInt(
+    row.querySelector(".pilotPosicao").value
+  ),
+
+  pontos: parseInt(
+    row.querySelector(".pilotPontos").value
+  )
+
+});
+
+});
+
+try{
+
+await addDoc(collection(db, "corridas"), {
+
+  nome: nome,
+
+  pista: pista,
+
+  data: data,
+
+  criadoEm: Date.now(),
+
+  resultados: resultados
+
+});
+
+alert("Corrida criada!");
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+});
+
+/* ========================= */
+/* PEDIDOS */
+/* ========================= */
+
+let caixaAtual = 0;
+
+function formatMoney(value){
+
+  return value.toLocaleString("pt-BR");
+
+}
+
+function loadPedidos(){
+
+  const pedidosContainer =
+  document.getElementById("pedidosContainer");
+
+  const pedidosQuery =
+  query(
+
+    collection(db, "pedidos"),
+
+    orderBy("criadoEm", "desc")
+
+  );
+
+  onSnapshot(pedidosQuery, (snapshot) => {
+
+    pedidosContainer.innerHTML = "";
+
+    caixaAtual = 0;
+
+    snapshot.forEach((docSnap) => {
+
+      const pedido = docSnap.data();
+
+      const pedidoId = docSnap.id;
+
+      /* SOMA CAIXA */
+
+      if(pedido.status === "concluido"){
+
+        caixaAtual +=
+        pedido.valorLiquido || 0;
+
+      }
+
+      /* ITENS */
+
+      let itensHTML = "";
+
+      if(pedido.itens){
+
+        pedido.itens.forEach((item) => {
+
+          itensHTML += `
+
+            <div class="pedido-item">
+
+              <span>
+
+                ${item.nome}
+
+              </span>
+
+              <strong>
+
+                x${item.quantidade}
+
+              </strong>
+
+            </div>
+
+          `;
+
+        });
+
+      }
+
+      const card =
+      document.createElement("div");
+
+      card.classList.add("pedido-card");
+
+      card.innerHTML = `
+
+        <div class="pedido-top">
+
+          <div>
+
+            <h3>
+
+              ${pedido.clienteNome}
+
+            </h3>
+
+            <span>
+
+              Vendedor:
+              ${pedido.pilotoNome}
+
+            </span>
+
+          </div>
+
+          <div class="pedido-status ${pedido.status}">
+
+            ${pedido.status}
+
+          </div>
+
+        </div>
+
+        <div class="pedido-itens">
+
+          ${itensHTML}
+
+        </div>
+
+        <div class="pedido-financeiro">
+
+          <div>
+
+            <span>
+              TOTAL
+            </span>
+
+            <strong>
+              R$ ${formatMoney(pedido.valorTotal)}
+            </strong>
+
+          </div>
+
+          <div>
+
+            <span>
+              COMISSÃO
+            </span>
+
+            <strong>
+              R$ ${formatMoney(pedido.valorComissao)}
+            </strong>
+
+          </div>
+
+          <div>
+
+            <span>
+              LÍQUIDO
+            </span>
+
+            <strong>
+              R$ ${formatMoney(pedido.valorLiquido)}
+            </strong>
+
+          </div>
+
+        </div>
+
+        <div class="pedido-actions">
+
+          <button
+            class="aprovar-btn"
+            onclick="aprovarPedido('${pedidoId}')">
+
+            CONCLUIR
+
+          </button>
+
+          <button
+            class="delete-btn"
+            onclick="deletarPedido('${pedidoId}')">
+
+            EXCLUIR
+
+          </button>
+
+        </div>
+
+      `;
+
+      pedidosContainer.appendChild(card);
+
+    });
+
+    document.getElementById("caixaTotal")
+    .textContent = `R$ ${formatMoney(caixaAtual)}`;
+
+  });
+
+}
+
+/* ========================= */
+/* APROVAR */
+/* ========================= */
+
+window.aprovarPedido = async (pedidoId) => {
+
+  const pedidoRef =
+  doc(db, "pedidos", pedidoId);
+
+  await updateDoc(pedidoRef, {
+
+    status: "concluido"
+
+  });
+
+};
+
+/* ========================= */
+/* DELETE */
+/* ========================= */
+
+window.deletarPedido = async (pedidoId) => {
+
+  const confirmar =
+  confirm("Excluir pedido?");
+
+  if(!confirmar) return;
+
+  await deleteDoc(
+
+    doc(db, "pedidos", pedidoId)
+
+  );
+
+};
+
+/* INIT */
+
+carregarPilotos();
+
+/* FADEOUT VOLTAR */
+
+document
+.getElementById("back-panel-btn")
+.addEventListener("click", () => {
+
+  const transition =
+  document.querySelector(".page-transition");
+
+  transition.classList.add("active");
+
+  setTimeout(() => {
+
+    window.location.href =
+    "painel.html";
+
+  }, 450);
+
+});
+
+const toggleBtn =
+document.getElementById(
+  "toggleInscricoesBtn"
+);
+
+async function carregarStatusInscricoes(){
+
+  const configRef =
+  doc(db, "sistema", "config");
+
+  const configSnap =
+  await getDoc(configRef);
+
+  if(!configSnap.exists()){
+
+    await setDoc(configRef, {
+
+      inscricoesAbertas: false
+
+    });
+
+  }
+
+  const sistemaSnap =
+  await getDoc(configRef);
+
+  const sistema =
+  sistemaSnap.data();
+
+  toggleBtn.innerHTML =
+  sistema.inscricoesAbertas
+  ? "FECHAR INSCRIÇÕES"
+  : "ABRIR INSCRIÇÕES";
+
+}
+
+toggleBtn.addEventListener(
+  "click",
+  async () => {
+
+    const configRef =
+    doc(db, "sistema", "config");
+
+    const configSnap =
+    await getDoc(configRef);
+
+    const sistema =
+    configSnap.data();
+
+    await setDoc(configRef, {
+
+      inscricoesAbertas:
+      !sistema.inscricoesAbertas
+
+    });
+
+    carregarStatusInscricoes();
+
+  }
+);
+
+carregarStatusInscricoes();
+
+/* ========================= */
+/* RESET COLETAS */
+/* ========================= */
+
+document
+.getElementById("resetColetasBtn")
+.addEventListener("click", async() => {
+
+  const confirmar =
+  confirm(
+    "Tem certeza que deseja RESETAR TODAS AS COLETAS?"
+  );
+
+  if(!confirmar) return;
+
+  try {
+
+    const snapshot =
+    await getDocs(
+      collection(db, "coletas")
+    );
+
+    for(const item of snapshot.docs){
+
+      await deleteDoc(item.ref);
+
+    }
+
+    alert("Coletas resetadas com sucesso!");
+
+  } catch(error){
+
+    console.error(error);
+
+    alert("Erro ao resetar coletas.");
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>

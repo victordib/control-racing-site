@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Coleta - Control Racing</title>
+
+  <link rel="stylesheet"
+        href="css/style-coleta.css">
+
+  <link rel="stylesheet"
+        href="css/style.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png">
+
+  </div>
+
+  <ul class="nav-links">
+
+    <li><a href="painel.html">Painel</a></li>
+
+    <li><a href="meus-pedidos.html">Pedidos</a></li>
+
+  </ul>
+
+</nav>
+
+<!-- PAGE -->
+
+<section class="page">
+
+  <div class="container">
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+      <h1>
+
+        COLETA
+
+      </h1>
+
+      <p>
+
+        sistema de materiais recicláveis
+
+      </p>
+
+    </div>
+
+    <!-- STATS -->
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+
+        <span>SEU TOTAL</span>
+
+        <strong id="meuTotal">
+
+          0
+
+        </strong>
+
+      </div>
+
+      <div class="stat-card">
+
+        <span>SUA POSIÇÃO</span>
+
+        <strong id="minhaPosicao">
+
+          #-
+
+        </strong>
+
+      </div>
+
+      <div class="stat-card">
+
+        <span>LÍDER</span>
+
+        <strong id="liderNome">
+
+          -
+
+        </strong>
+
+      </div>
+
+    </div>
+
+    <!-- FORM -->
+
+    <div class="form-card">
+
+      <div class="input-group">
+
+        <label>
+
+          QUANTIDADE
+
+        </label>
+
+        <input type="number"
+               id="quantidadeInput"
+               placeholder="Digite a quantidade">
+
+      </div>
+
+      <div class="input-group">
+
+        <label>
+
+          OBSERVAÇÃO
+
+        </label>
+
+        <textarea id="obsInput"
+                  placeholder="Observação opcional"></textarea>
+
+      </div>
+
+      <button id="registrarBtn">
+
+        REGISTRAR COLETA
+
+      </button>
+
+    </div>
+
+    <!-- RANKING -->
+
+    <div class="ranking-card">
+
+      <div class="ranking-header">
+
+        <h2>
+
+          RANKING
+
+        </h2>
+
+      </div>
+
+      <div id="rankingList"
+           class="ranking-list">
+
+        <div class="empty">
+
+          CARREGANDO...
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<div class="page-transition"></div>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getAuth,
+  onAuthStateChanged
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  doc,
+  getDoc
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app =
+initializeApp(firebaseConfig);
+
+const auth =
+getAuth(app);
+
+const db =
+getFirestore(app);
+
+/* ELEMENTS */
+
+const rankingList =
+document.getElementById("rankingList");
+
+const meuTotal =
+document.getElementById("meuTotal");
+
+const minhaPosicao =
+document.getElementById("minhaPosicao");
+
+const liderNome =
+document.getElementById("liderNome");
+
+const registrarBtn =
+document.getElementById("registrarBtn");
+
+let pilotoAtual = {};
+
+/* AUTH */
+
+onAuthStateChanged(auth, async(user) => {
+
+  if(!user){
+
+    window.location.href = "login.html";
+
+    return;
+
+  }
+
+  const userRef =
+  doc(db, "usuarios", user.uid);
+
+  const userSnap =
+  await getDoc(userRef);
+
+  if(!userSnap.exists()){
+
+    window.location.href = "login.html";
+
+    return;
+
+  }
+
+  pilotoAtual = {
+
+    uid:user.uid,
+    ...userSnap.data()
+
+  };
+
+  carregarRanking();
+
+});
+
+/* REGISTRAR */
+
+registrarBtn.addEventListener("click", async() => {
+
+  const quantidade =
+  Number(
+    document
+    .getElementById("quantidadeInput")
+    .value
+  );
+
+  const observacao =
+  document
+  .getElementById("obsInput")
+  .value;
+
+  if(quantidade <= 0){
+
+    alert("Digite uma quantidade válida.");
+
+    return;
+
+  }
+
+  await addDoc(
+    collection(db, "coletas"),
+    {
+
+      piloto:pilotoAtual.nome,
+
+      pilotoUid:pilotoAtual.uid,
+
+      quantidade:quantidade,
+
+      observacao:observacao,
+
+      data:new Date()
+      .toLocaleString("pt-BR"),
+
+      criadoEm:Date.now()
+
+    }
+  );
+
+  document
+  .getElementById("quantidadeInput")
+  .value = "";
+
+  document
+  .getElementById("obsInput")
+  .value = "";
+
+  carregarRanking();
+
+});
+
+/* RANKING */
+
+async function carregarRanking(){
+
+  rankingList.innerHTML = `
+  
+    <div class="empty">
+
+      CARREGANDO...
+
+    </div>
+
+  `;
+
+  const q =
+  query(
+    collection(db, "coletas"),
+    orderBy("criadoEm", "desc")
+  );
+
+  const snapshot =
+  await getDocs(q);
+
+  let ranking = {};
+
+  snapshot.forEach((docItem) => {
+
+    const coleta =
+    docItem.data();
+
+    const chave = coleta.piloto;
+
+    if(!ranking[chave]){
+
+      ranking[chave] = {
+
+        nome: coleta.piloto,
+
+        total: 0
+
+      };
+
+    }
+
+    ranking[chave].total += Number(
+      coleta.quantidade || 0
+    );
+
+  });
+
+  const rankingArray =
+  Object.values(ranking)
+  .sort((a,b) => b.total - a.total);
+
+  rankingList.innerHTML = "";
+
+  let minhaPos = "-";
+  let meuValor = 0;
+
+  rankingArray.forEach((item, index) => {
+
+    if(item.nome.toLowerCase() === pilotoAtual.nome.toLowerCase()){
+
+      minhaPos = index + 1;
+      meuValor = item.total;
+
+    }
+
+    rankingList.innerHTML += `
+
+      <div class="ranking-item">
+
+        <div class="ranking-left">
+
+          <span class="position">
+
+            #${index + 1}
+
+          </span>
+
+          <div>
+
+            <h3>
+
+              ${item.nome}
+
+            </h3>
+
+          </div>
+
+        </div>
+
+        <strong>
+
+          ${item.total.toLocaleString("pt-BR")}
+
+        </strong>
+
+      </div>
+
+    `;
+
+  });
+
+  meuTotal.innerText =
+  meuValor.toLocaleString("pt-BR");
+
+  minhaPosicao.innerText =
+  "#" + minhaPos;
+
+  liderNome.innerText =
+  rankingArray[0]?.nome || "-";
+
+}
+
+</script>
+
+<script src="script.js"></script>
+
+</body>
+</html>

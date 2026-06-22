@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Control Racing</title>
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="css/style.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <!-- LOGO -->
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png" alt="Control Racing">
+
+  </div>
+
+  <!-- MENU -->
+  <ul class="nav-links">
+
+    <li><a href="index.html">Home</a></li>
+
+    <li><a href="equipe.html">Equipe</a></li>
+
+    <li><a href="blacklist.html">Blacklist</a></li>
+
+    <li><a href="hall.html">Hall da Fama</a></li>
+
+    <li><a href="sobre.html">Sobre</a></li>
+
+    <li><a href="memorial.html">Memorial</a></li>
+
+    <li>
+      <a id="auth-link">
+        LOGIN
+      </a>
+    </li>
+
+  </ul>
+
+</nav>
+  <section class="hero">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+<div class="members-header">
+
+  <h1 class="glitch" data-text="MEMBROS">
+    MEMBROS
+  </h1>
+
+</div>
+
+<div class="staff-grid" 
+      id="staff-grid">
+
+</div>
+
+
+  </section>
+
+
+  <!-- FOOTER -->
+
+<footer class="footer">
+
+  <div class="footer-line"></div>
+
+  <div class="footer-content">
+
+    <p>
+      © 2026 CONTROL RACING — Todos os direitos reservados
+    </p>
+
+    <span>
+      Equipe de Corrida de Servidores de GTARP
+    </span>
+
+  </div>
+
+</footer>
+
+<div class="page-transition"></div>
+<script src="script.js"></script>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  where
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+/* LOAD MEMBERS */
+
+async function loadMembers(){
+
+  const grid =
+  document.getElementById("staff-grid");
+
+      const q = query(
+
+        collection(db, "usuarios"),
+
+        where("visivel", "==", true),
+
+        orderBy("ordem", "asc")
+
+      );
+
+    const querySnapshot =
+    await getDocs(q);
+
+  querySnapshot.forEach((docSnap) => {
+
+    const data = docSnap.data();
+
+    const card =
+    document.createElement("a");
+
+    card.href =
+    `piloto.html?uid=${docSnap.id}&mode=driver`;
+
+    card.classList.add("member-card");
+
+    card.classList.add("card-link");
+
+    card.innerHTML = `
+
+      <div class="glow"></div>
+
+      <img src="${data.foto}"
+           alt="${data.nome}">
+
+      <h3>${data.nome}</h3>
+
+      <p>${data.equipe}</p>
+
+    `;
+
+    grid.appendChild(card);
+
+    card.addEventListener("click", (e) => {
+
+      e.preventDefault();
+
+      const transition =
+      document.querySelector(".page-transition");
+
+      transition.classList.add("active");
+
+      setTimeout(() => {
+
+        window.location.href =
+        card.href;
+
+      }, 450);
+
+    });
+
+  });
+
+}
+
+loadMembers();
+
+</script>
+<script type="module" src="js/navbar-auth.js"></script>
+</body>
+</html>

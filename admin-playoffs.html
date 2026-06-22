@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Admin Playoffs - Control Racing</title>
+
+  <link rel="stylesheet"
+        href="css/style-admin-playoffs.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- BG -->
+
+<div class="bg-image">
+
+  <img src="https://a.imagem.app/GYziVJ.png">
+
+</div>
+
+<div class="overlay"></div>
+
+<div class="hud-lines"></div>
+
+<!-- CONTAINER -->
+
+<section class="admin-wrapper">
+
+  <div class="admin-card">
+
+    <span class="system-text">
+
+      CONTROL RACING NETWORK
+
+    </span>
+
+    <h1>
+
+      ADMINISTRAR PLAYOFFS
+
+    </h1>
+
+    <!-- QUARTAS -->
+
+    <div class="section-title">
+
+      QUARTAS DE FINAL
+
+    </div>
+
+    <!-- MATCH 1 -->
+
+    <div class="match-box">
+
+      <span class="match-label">
+
+        CONFRONTO 1
+
+      </span>
+
+      <select id="q1-p1"></select>
+
+      <select id="q1-p2"></select>
+
+      <select id="q1-win"></select>
+
+    </div>
+
+    <!-- MATCH 2 -->
+
+    <div class="match-box">
+
+      <span class="match-label">
+
+        CONFRONTO 2
+
+      </span>
+
+      <select id="q2-p1"></select>
+
+      <select id="q2-p2"></select>
+
+      <select id="q2-win"></select>
+
+    </div>
+
+    <!-- MATCH 3 -->
+
+    <div class="match-box">
+
+      <span class="match-label">
+
+        CONFRONTO 3
+
+      </span>
+
+      <select id="q3-p1"></select>
+
+      <select id="q3-p2"></select>
+
+      <select id="q3-win"></select>
+
+    </div>
+
+    <!-- MATCH 4 -->
+
+    <div class="match-box">
+
+      <span class="match-label">
+
+        CONFRONTO 4
+
+      </span>
+
+      <select id="q4-p1"></select>
+
+      <select id="q4-p2"></select>
+
+      <select id="q4-win"></select>
+
+    </div>
+
+    <!-- SEMIFINAIS -->
+
+    <div class="admin-round">
+
+      <h2>
+        SEMIFINAIS
+      </h2>
+
+      <div class="admin-match">
+
+        <select id="sf1-p1" disabled></select>
+
+        <select id="sf1-p2" disabled></select>
+
+        <select id="sf1-win"></select>
+
+      </div>
+
+      <div class="admin-match">
+
+        <select id="sf2-p1" disabled></select>
+
+        <select id="sf2-p2" disabled></select>
+
+        <select id="sf2-win"></select>
+
+      </div>
+
+    </div>
+
+    <!-- FINAL -->
+
+    <div class="admin-round">
+
+      <h2>
+        FINAL
+      </h2>
+
+      <div class="admin-match">
+
+        <select id="f1-p1" disabled></select>
+
+        <select id="f1-p2" disabled></select>
+
+        <select id="f1-win"></select>
+
+      </div>
+
+    </div>
+
+    <!-- CAMPEÃO -->
+
+    <div class="admin-round">
+
+      <h2>
+        CAMPEÃO
+      </h2>
+
+      <div class="admin-match">
+
+        <select id="campeao" disabled></select>
+
+      </div>
+
+    </div>
+
+    <!-- BOTÕES -->
+
+    <div class="buttons">
+
+      <button id="saveBtn">
+
+        SALVAR PLAYOFFS
+
+      </button>
+
+      <a href="admin.html">
+
+        <button class="back-btn">
+
+          VOLTAR
+
+        </button>
+
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- TRANSITION -->
+
+<div class="page-transition"></div>
+
+<script src="script.js"></script>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getFirestore,
+  collection,
+  getDocs,
+  doc,
+  setDoc,
+  getDoc
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+
+  getAuth,
+  onAuthStateChanged
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+/* TODOS OS SELECTS */
+
+const selects = [
+
+  "q1-p1","q1-p2","q1-win",
+  "q2-p1","q2-p2","q2-win",
+  "q3-p1","q3-p2","q3-win",
+  "q4-p1","q4-p2","q4-win",
+
+  "sf1-p1","sf1-p2","sf1-win",
+  "sf2-p1","sf2-p2","sf2-win",
+
+  "f1-p1","f1-p2","f1-win",
+
+  "campeao"
+
+];
+
+/* VERIFICAR LOGIN */
+
+onAuthStateChanged(auth, async (user) => {
+
+  if(!user){
+
+    alert("Você precisa estar logado.");
+
+    window.location.href = "login.html";
+
+    return;
+
+  }
+
+  await loadPilotos();
+
+  await loadPlayoffs();
+
+});
+
+/* ========================= */
+/* LOAD PILOTOS */
+/* ========================= */
+
+async function loadPilotos(){
+
+  const usuariosSnap =
+  await getDocs(collection(db, "usuarios"));
+
+  const pilotos = [];
+
+  usuariosSnap.forEach((docSnap) => {
+
+    const data = docSnap.data();
+
+    pilotos.push({
+
+      uid: docSnap.id,
+      nome: data.nome || "SEM NOME"
+
+    });
+
+  });
+
+  /* POPULAR SELECTS */
+
+  selects.forEach((id) => {
+
+    const select =
+    document.getElementById(id);
+
+    if(!select) return;
+
+    select.innerHTML =
+    `<option value="">SELECIONE UM PILOTO</option>`;
+
+    pilotos.forEach((piloto) => {
+
+      const option =
+      document.createElement("option");
+
+      option.value =
+      piloto.uid;
+
+      option.textContent =
+      piloto.nome;
+
+      select.appendChild(option);
+
+    });
+
+  });
+
+  updateWinnerOptions();
+
+}
+
+/* ========================= */
+/* LOAD PLAYOFFS */
+/* ========================= */
+
+async function loadPlayoffs(){
+
+  const playoffsRef =
+  doc(db, "playoffs", "temporadaAtual");
+
+  const playoffsSnap =
+  await getDoc(playoffsRef);
+
+  if(!playoffsSnap.exists()) return;
+
+  const data =
+  playoffsSnap.data();
+
+  /* QUARTAS */
+
+  if(data.quartas){
+
+    data.quartas.forEach((match, index) => {
+
+      const i = index + 1;
+
+      document.getElementById(`q${i}-p1`).value =
+      match.piloto1 || "";
+
+      document.getElementById(`q${i}-p2`).value =
+      match.piloto2 || "";
+
+      document.getElementById(`q${i}-win`).value =
+      match.vencedor || "";
+
+    });
+
+  }
+
+  /* SEMIFINAIS */
+
+  if(data.semifinais){
+
+    data.semifinais.forEach((match, index) => {
+
+      const i = index + 1;
+
+      document.getElementById(`sf${i}-p1`).value =
+      match.piloto1 || "";
+
+      document.getElementById(`sf${i}-p2`).value =
+      match.piloto2 || "";
+
+      document.getElementById(`sf${i}-win`).value =
+      match.vencedor || "";
+
+    });
+
+  }
+
+  /* FINAL */
+
+  if(data.final){
+
+    data.final.forEach((match, index) => {
+
+      const i = index + 1;
+
+      document.getElementById(`f${i}-p1`).value =
+      match.piloto1 || "";
+
+      document.getElementById(`f${i}-p2`).value =
+      match.piloto2 || "";
+
+      document.getElementById(`f${i}-win`).value =
+      match.vencedor || "";
+
+    });
+
+  }
+
+  /* CAMPEÃO */
+
+  if(data.campeao){
+
+    document.getElementById("campeao").value =
+    data.campeao;
+
+  }
+
+  updateWinnerOptions();
+}
+
+/* ========================= */
+/* UPDATE WINNER SELECTS */
+/* ========================= */
+
+function updateWinnerOptions(){
+
+  /* QUARTAS */
+
+  for(let i = 1; i <= 4; i++){
+
+    const p1 =
+    document.getElementById(`q${i}-p1`);
+
+    const p2 =
+    document.getElementById(`q${i}-p2`);
+
+    const win =
+    document.getElementById(`q${i}-win`);
+
+    if(!p1 || !p2 || !win) continue;
+
+    const oldValue =
+    win.value;
+
+    win.innerHTML =
+    `<option value="">SELECIONE O VENCEDOR</option>`;
+
+    [p1.value, p2.value].forEach((uid) => {
+
+      if(uid){
+
+        const option =
+        document.createElement("option");
+
+        option.value =
+        uid;
+
+        option.textContent =
+        getPilotName(uid);
+
+        win.appendChild(option);
+
+      }
+
+    });
+
+    win.value = oldValue;
+
+  }
+
+  /* SEMIFINAIS */
+
+  for(let i = 1; i <= 2; i++){
+
+    const p1 =
+    document.getElementById(`sf${i}-p1`);
+
+    const p2 =
+    document.getElementById(`sf${i}-p2`);
+
+    const win =
+    document.getElementById(`sf${i}-win`);
+
+    if(!p1 || !p2 || !win) continue;
+
+    const oldValue =
+    win.value;
+
+    win.innerHTML =
+    `<option value="">SELECIONE O VENCEDOR</option>`;
+
+    [p1.value, p2.value].forEach((uid) => {
+
+      if(uid){
+
+        const option =
+        document.createElement("option");
+
+        option.value =
+        uid;
+
+        option.textContent =
+        getPilotName(uid);
+
+        win.appendChild(option);
+
+      }
+
+    });
+
+    win.value = oldValue;
+
+  }
+
+  /* FINAL */
+
+  const fp1 =
+  document.getElementById("f1-p1");
+
+  const fp2 =
+  document.getElementById("f1-p2");
+
+  const fwin =
+  document.getElementById("f1-win");
+
+  if(fp1 && fp2 && fwin){
+
+    const oldValue =
+    fwin.value;
+
+    fwin.innerHTML =
+    `<option value="">SELECIONE O CAMPEÃO</option>`;
+
+    [fp1.value, fp2.value].forEach((uid) => {
+
+      if(uid){
+
+        const option =
+        document.createElement("option");
+
+        option.value =
+        uid;
+
+        option.textContent =
+        getPilotName(uid);
+
+        fwin.appendChild(option);
+
+      }
+
+    });
+
+    fwin.value = oldValue;
+
+  }
+
+}
+
+/* ========================= */
+/* GET PILOT NAME */
+/* ========================= */
+
+function getPilotName(uid){
+
+  const option =
+  document.querySelector(`option[value="${uid}"]`);
+
+  return option
+    ? option.textContent
+    : "PILOTO";
+
+}
+
+/* ========================= */
+/* SAVE PLAYOFFS */
+/* ========================= */
+
+document
+.getElementById("saveBtn")
+.addEventListener("click", async () => {
+
+  /* QUARTAS */
+
+  const quartas = [
+
+    {
+
+      piloto1:
+      document.getElementById("q1-p1").value,
+
+      piloto2:
+      document.getElementById("q1-p2").value,
+
+      vencedor:
+      document.getElementById("q1-win").value || ""
+
+    },
+
+    {
+
+      piloto1:
+      document.getElementById("q2-p1").value,
+
+      piloto2:
+      document.getElementById("q2-p2").value,
+
+      vencedor:
+      document.getElementById("q2-win").value || ""
+
+    },
+
+    {
+
+      piloto1:
+      document.getElementById("q3-p1").value,
+
+      piloto2:
+      document.getElementById("q3-p2").value,
+
+      vencedor:
+      document.getElementById("q3-win").value || ""
+
+    },
+
+    {
+
+      piloto1:
+      document.getElementById("q4-p1").value,
+
+      piloto2:
+      document.getElementById("q4-p2").value,
+
+      vencedor:
+      document.getElementById("q4-win").value || ""
+
+    }
+
+  ];
+
+  /* SEMIFINAIS */
+
+  const semifinais = [
+
+    {
+
+      piloto1:
+      quartas[0].vencedor || "",
+
+      piloto2:
+      quartas[1].vencedor || "",
+
+      vencedor:
+      document.getElementById("sf1-win").value || ""
+
+    },
+
+    {
+
+      piloto1:
+      quartas[2].vencedor || "",
+
+      piloto2:
+      quartas[3].vencedor || "",
+
+      vencedor:
+      document.getElementById("sf2-win").value || ""
+
+    }
+
+  ];
+
+  /* FINAL */
+
+  const final = [
+
+    {
+
+      piloto1:
+      semifinais[0].vencedor || "",
+
+      piloto2:
+      semifinais[1].vencedor || "",
+
+      vencedor:
+      document.getElementById("f1-win").value || ""
+
+    }
+
+  ];
+
+  /* CAMPEÃO */
+
+  const campeao =
+  final[0].vencedor || "";
+
+  /* SAVE */
+
+  await setDoc(
+
+    doc(db, "playoffs", "temporadaAtual"),
+
+    {
+
+      quartas,
+      semifinais,
+      final,
+      campeao
+
+    },
+
+    { merge: true }
+
+  );
+
+  alert("Playoffs atualizados!");
+
+  /* RELOAD */
+
+  await loadPlayoffs();
+
+  updateWinnerOptions();
+
+});
+
+</script>
+
+</body>
+</html>

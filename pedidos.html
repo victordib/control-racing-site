@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Pedidos - Control Racing</title>
+
+  <link rel="icon"
+        type="image/x-icon"
+        href="favicon.ico">
+
+  <link rel="stylesheet"
+        href="css/style-pedidos.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png"
+         alt="Control Racing">
+
+  </div>
+
+  <ul class="nav-links">
+
+    <li><a href="index.html">Home</a></li>
+
+    <li><a href="equipe.html">Equipe</a></li>
+
+    <li><a href="blacklist.html">Blacklist</a></li>
+
+    <li><a href="hall.html">Hall da Fama</a></li>
+
+    <li><a href="sobre.html">Sobre</a></li>
+
+    <li><a href="memorial.html">Memorial</a></li>
+
+    <li>
+      <a id="auth-link">
+        LOGIN
+      </a>
+    </li>
+
+  </ul>
+
+</nav>
+
+<!-- HERO -->
+
+<section class="hero">
+
+  <div class="pedido-container">
+
+    <!-- HEADER -->
+
+    <div class="pedido-header">
+
+      <h1 class="glitch"
+          data-text="PEDIDOS">
+
+        PEDIDOS
+
+      </h1>
+
+      <p>
+
+        Sistema interno de vendas Control Racing
+
+      </p>
+
+    </div>
+
+    <!-- FORM -->
+
+    <div class="pedido-card">
+
+      <!-- PILOTO -->
+
+      <div class="input-group">
+
+        <label>
+          VENDEDOR RESPONSÁVEL
+        </label>
+
+        <input type="text"
+              id="pilotoNome"
+              disabled>
+
+      </div>
+
+
+
+      <!-- CLIENTE -->
+
+      <div class="input-group">
+
+        <label>
+          CLIENTE
+        </label>
+
+        <input type="text"
+               id="clienteNome"
+               placeholder="Nome do cliente">
+
+      </div>
+
+      <!-- ITENS -->
+
+      <div class="pedido-items">
+
+        <!-- TABLET -->
+
+        <div class="item-row">
+
+          <div class="item-info">
+
+            <h3>TABLET DE CORRIDA</h3>
+
+            <span>
+              Parceiro: 8.000 | Terceiro: 8.000
+            </span>
+
+          </div>
+
+          <div class="item-input">
+
+            <label>QTD</label>
+
+            <input type="number"
+                  class="item-qty"
+                  id="tabletQty"
+                  min="0"
+                  value="0">
+
+          </div>
+
+        </div>
+
+        <!-- CINTO -->
+
+        <div class="item-row">
+
+          <div class="item-info">
+
+            <h3>CINTO DE CORRIDA</h3>
+
+            <span>
+              Parceiro: 12.000 | Terceiro: 14.000
+            </span>
+
+          </div>
+
+          <div class="item-input">
+
+            <label>QTD</label>
+
+            <input type="number"
+                  class="item-qty"
+                  id="cintoQty"
+                  min="0"
+                  value="0">
+
+          </div>
+
+        </div>
+
+        <!-- FLIPPER -->
+
+        <div class="item-row">
+
+          <div class="item-info">
+
+            <h3>FLIPPER</h3>
+
+            <span>
+              Parceiro: 8.000 | Terceiro: 8.000
+            </span>
+
+          </div>
+
+          <div class="item-input">
+
+            <label>QTD</label>
+
+            <input type="number"
+                  class="item-qty"
+                  id="flipperQty"
+                  min="0"
+                  value="0">
+
+          </div>
+
+        </div>
+
+        <!-- PENDRIVE -->
+
+        <div class="item-row">
+
+          <div class="item-info">
+
+            <h3>PENDRIVE DE BOOSTING</h3>
+
+            <span>
+              Parceiro: 10.000 | Terceiro: 12.000
+            </span>
+
+          </div>
+
+          <div class="item-input">
+
+            <label>QTD</label>
+
+            <input type="number"
+                  class="item-qty"
+                  id="pendriveQty"
+                  min="0"
+                  value="0">
+
+          </div>
+
+        </div>
+
+        <!-- PLACA -->
+
+        <div class="item-row">
+
+          <div class="item-info">
+
+            <h3>PLACA FALSA</h3>
+
+            <span>
+              Parceiro: 15.000 | Terceiro: 15.000
+            </span>
+
+          </div>
+
+          <div class="item-input">
+
+            <label>QTD</label>
+
+            <input type="number"
+                  class="item-qty"
+                  id="placaQty"
+                  min="0"
+                  value="0">
+
+          </div>
+
+        </div>
+
+        <!-- ANTI-LAG INSTALAÇÃO -->
+
+        <div class="item-row">
+
+          <div class="item-info">
+
+            <h3>ANTI-LAG INSTALAÇÃO</h3>
+
+            <span>
+              Valor: 10.000
+            </span>
+
+          </div>
+
+          <div class="item-input">
+
+            <label>QTD</label>
+
+            <input type="number"
+                  class="item-qty"
+                  id="antilagInstallQty"
+                  min="0"
+                  value="0">
+
+          </div>
+
+        </div>
+
+        <!-- ANTI-LAG ALTERAÇÃO -->
+
+        <div class="item-row">
+
+          <div class="item-info">
+
+            <h3>ANTI-LAG ALTERAÇÃO</h3>
+
+            <span>
+              Valor: 5.000
+            </span>
+
+          </div>
+
+          <div class="item-input">
+
+            <label>QTD</label>
+
+            <input type="number"
+                  class="item-qty"
+                  id="antilagChangeQty"
+                  min="0"
+                  value="0">
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- TIPO --> 
+      <div class="input-group"> 
+
+        <label> TIPO DE VENDA </label> 
+
+        <select id="tipoVenda"> 
+
+          <option value=""> SELECIONE </option> 
+
+          <option value="parceiro"> Parceiro </option> 
+
+          <option value="terceiro"> Terceiro </option> 
+
+        </select> 
+
+      </div>
+
+      <!-- VALOR -->
+
+      <div class="input-group">
+
+        <label>
+          VALOR TOTAL
+        </label>
+
+        <input type="text"
+              id="valorTotal"
+              disabled>
+
+      </div>
+
+      <!-- COMISSÃO -->
+
+      <div class="input-group">
+
+        <label>
+          COMISSÃO
+        </label>
+
+        <input type="text"
+              id="comissao"
+              disabled>
+
+      </div>
+
+
+
+      <!-- OBS -->
+
+      <div class="input-group">
+
+        <label>
+          OBSERVAÇÕES
+        </label>
+
+        <textarea id="observacoes"
+                  placeholder="Observações adicionais"></textarea>
+
+      </div>
+
+      <!-- RESUMO -->
+
+      <div class="pedido-resumo">
+
+        <div>
+
+          <span>
+            VALOR LÍQUIDO
+          </span>
+
+          <strong id="valorLiquido">
+
+            R$ 0
+
+          </strong>
+
+        </div>
+
+      </div>
+
+      <!-- BTN -->
+
+      <button id="submitPedidoBtn">
+
+        ENVIAR PEDIDO
+
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+  <div class="footer-line"></div>
+
+  <div class="footer-content">
+
+    <p>
+      © 2026 CONTROL RACING — Todos os direitos reservados
+    </p>
+
+    <span>
+      Equipe de Corrida de Servidores de GTARP
+    </span>
+
+  </div>
+
+</footer>
+
+<div class="page-transition"></div>
+<script src="script.js"></script>
+
+<script type="module"
+        src="js/navbar-auth.js"></script>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getFirestore,
+  collection,
+  addDoc, 
+  doc, 
+  getDoc
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import { 
+
+  getAuth, 
+  onAuthStateChanged 
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app =
+initializeApp(firebaseConfig);
+
+const db =
+getFirestore(app);
+
+
+const auth =
+getAuth(app);
+
+let pilotoAtual = null;
+
+/* AUTH */
+
+onAuthStateChanged(auth, async (user) => {
+
+  if(!user){
+
+    alert("Faça login para acessar.");
+
+    window.location.href = "login.html";
+
+    return;
+
+  }
+
+  const userRef =
+  doc(db, "usuarios", user.uid);
+
+  const userSnap =
+  await getDoc(userRef);
+
+  if(!userSnap.exists()){
+
+    return;
+
+  }
+
+  pilotoAtual = {
+
+    uid: user.uid,
+
+    ...userSnap.data()
+
+  };
+
+  document.getElementById("pilotoNome")
+  .value = pilotoAtual.nome;
+
+});
+
+
+/* ========================= */
+/* CALCULO MULTI ITENS */
+/* ========================= */
+
+function atualizarResumo(){
+
+  const tipoVenda =
+  document.getElementById("tipoVenda").value;
+
+  let total = 0;
+
+  let comissao = 0;
+
+  /* TABLET */
+
+  const tabletQty =
+  parseInt(
+    document.getElementById("tabletQty").value
+  ) || 0;
+
+  if(tipoVenda === "parceiro"){
+
+    total += tabletQty * 8000;
+
+  }else{
+
+    total += tabletQty * 8000;
+
+  }
+
+  comissao += tabletQty * 2000;
+
+  /* CINTO */
+
+  const cintoQty =
+  parseInt(
+    document.getElementById("cintoQty").value
+  ) || 0;
+
+  if(tipoVenda === "parceiro"){
+
+    total += cintoQty * 12000;
+
+  }else{
+
+    total += cintoQty * 14000;
+
+  }
+
+  comissao += cintoQty * 4000;
+
+  /* FLIPPER */
+
+  const flipperQty =
+  parseInt(
+    document.getElementById("flipperQty").value
+  ) || 0;
+
+  total += flipperQty * 8000;
+
+  comissao += flipperQty * 2000;
+
+  /* PENDRIVE */
+
+  const pendriveQty =
+  parseInt(
+    document.getElementById("pendriveQty").value
+  ) || 0;
+
+  if(tipoVenda === "parceiro"){
+
+    total += pendriveQty * 10000;
+
+  }else{
+
+    total += pendriveQty * 12000;
+
+  }
+
+  comissao += pendriveQty * 3000;
+
+  /* PLACA */
+
+  const placaQty =
+  parseInt(
+    document.getElementById("placaQty").value
+  ) || 0;
+
+  total += placaQty * 15000;
+
+  comissao += placaQty * 2000;
+
+  /* ANTI-LAG INSTALACAO */
+
+  const antiInstallQty =
+  parseInt(
+    document.getElementById("antilagInstallQty").value
+  ) || 0;
+
+  total += antiInstallQty * 10000;
+
+  /* ANTI-LAG ALTERACAO */
+
+  const antiChangeQty =
+  parseInt(
+    document.getElementById("antilagChangeQty").value
+  ) || 0;
+
+  total += antiChangeQty * 5000;
+
+  /* UPDATE UI */
+
+  document.getElementById("valorTotal")
+  .value =
+  total.toLocaleString("pt-BR");
+
+  document.getElementById("comissao")
+  .value =
+  comissao.toLocaleString("pt-BR");
+
+  document.getElementById("valorLiquido")
+  .innerHTML =
+  `R$ ${(total - comissao).toLocaleString("pt-BR")}`;
+
+}
+
+document
+.getElementById("tipoVenda")
+.addEventListener(
+  "change",
+  atualizarResumo
+);
+
+/* EVENTS */
+
+document
+.querySelectorAll(".item-qty")
+.forEach((input) => {
+
+  input.addEventListener(
+    "input",
+    atualizarResumo
+  );
+
+});
+
+/* INIT */
+
+atualizarResumo();
+
+/* ENVIAR PEDIDO */
+
+document
+.getElementById("submitPedidoBtn")
+.addEventListener("click", async () => {
+
+  const tipoVenda =
+  document.getElementById("tipoVenda").value;
+
+  const nomeCliente =
+  document.getElementById("clienteNome").value;
+
+  /* QUANTIDADES */
+
+  const tabletQty =
+  parseInt(document.getElementById("tabletQty").value) || 0;
+
+  const cintoQty =
+  parseInt(document.getElementById("cintoQty").value) || 0;
+
+  const flipperQty =
+  parseInt(document.getElementById("flipperQty").value) || 0;
+
+  const pendriveQty =
+  parseInt(document.getElementById("pendriveQty").value) || 0;
+
+  const placaQty =
+  parseInt(document.getElementById("placaQty").value) || 0;
+
+  const antilagInstallQty =
+  parseInt(document.getElementById("antilagInstallQty").value) || 0;
+
+  const antilagChangeQty =
+  parseInt(document.getElementById("antilagChangeQty").value) || 0;
+
+  /* VERIFICA */
+
+  const totalItens =
+
+    tabletQty +
+    cintoQty +
+    flipperQty +
+    pendriveQty +
+    placaQty +
+    antilagInstallQty +
+    antilagChangeQty;
+
+  if(totalItens <= 0){
+
+    alert("Adicione pelo menos 1 item.");
+
+    return;
+
+  }
+
+  if(!tipoVenda){
+
+  alert("Selecione o tipo de venda.");
+
+  return;
+
+}
+
+  /* PREÇOS */
+
+  const precos = {
+
+    tablet:
+    tipoVenda === "parceiro" ? 8000 : 8000,
+
+    cinto:
+    tipoVenda === "parceiro" ? 12000 : 14000,
+
+    flipper:
+    8000,
+
+    pendrive:
+    tipoVenda === "parceiro" ? 10000 : 12000,
+
+    placa:
+    15000,
+
+    antilagInstall:
+    10000,
+
+    antilagChange:
+    5000
+
+  };
+
+  /* COMISSÃO */
+
+  const comissao =
+
+    (tabletQty * 2000) +
+    (cintoQty * 4000) +
+    (flipperQty * 2000) +
+    (pendriveQty * 3000) +
+    (placaQty * 2000);
+
+  /* TOTAL */
+
+  const valorTotal =
+
+    (tabletQty * precos.tablet) +
+    (cintoQty * precos.cinto) +
+    (flipperQty * precos.flipper) +
+    (pendriveQty * precos.pendrive) +
+    (placaQty * precos.placa) +
+    (antilagInstallQty * precos.antilagInstall) +
+    (antilagChangeQty * precos.antilagChange);
+
+  try{
+
+    await addDoc(collection(db, "pedidos"), {
+
+      piloto: pilotoAtual.nome,
+
+      pilotoUid: pilotoAtual.uid,
+
+      cliente: nomeCliente,
+
+      tipoVenda: tipoVenda,
+
+      itens: {
+
+        tablet: tabletQty,
+
+        cinto: cintoQty,
+
+        flipper: flipperQty,
+
+        pendrive: pendriveQty,
+
+        placa: placaQty,
+
+        antilagInstall: antilagInstallQty,
+
+        antilagChange: antilagChangeQty
+
+      },
+
+      valorTotal: valorTotal,
+
+      valorLiquido: valorTotal - comissao,
+
+      comissao: comissao,
+
+      status: "pendente",
+
+      data:new Date()
+      .toLocaleString("pt-BR"),
+
+      criadoEm: Date.now()
+
+    });
+
+    alert("Pedido enviado!");
+
+    /* RESET */
+
+    document.getElementById("tabletQty").value = 0;
+    document.getElementById("cintoQty").value = 0;
+    document.getElementById("flipperQty").value = 0;
+    document.getElementById("pendriveQty").value = 0;
+    document.getElementById("placaQty").value = 0;
+    document.getElementById("antilagInstallQty").value = 0;
+    document.getElementById("antilagChangeQty").value = 0;
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(error.message);
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>

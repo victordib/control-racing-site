@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Histórico de Pedidos - Control Racing</title>
+
+  <link rel="stylesheet"
+        href="css/style-historico-pedidos.css">
+
+  <link rel="stylesheet"
+        href="css/style.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png">
+
+  </div>
+
+  <ul class="nav-links">
+
+    <li><a href="admin-pedidos.html">Admin Pedidos</a></li>
+
+    <li><a href="painel.html">Painel</a></li>
+
+  </ul>
+
+</nav>
+
+<section class="page">
+
+  <div class="container">
+
+    <div class="page-header">
+
+      <h1>HISTÓRICO DE PEDIDOS</h1>
+
+      <p>consulta completa de pedidos finalizados</p>
+
+    </div>
+
+    <div class="history-stats">
+
+      <div class="stat-card">
+
+        <span>TOTAL FINALIZADOS</span>
+
+        <strong id="totalFinalizados">0</strong>
+
+      </div>
+
+      <div class="stat-card">
+
+        <span>APROVADOS</span>
+
+        <strong id="totalAprovados">0</strong>
+
+      </div>
+
+      <div class="stat-card">
+
+        <span>RECUSADOS</span>
+
+        <strong id="totalRecusados">0</strong>
+
+      </div>
+
+      <div class="stat-card">
+
+        <span>VALOR APROVADO</span>
+
+        <strong id="valorAprovado">$0</strong>
+
+      </div>
+
+    </div>
+
+    <div class="pedidos-grid"
+         id="historicoGrid">
+
+      <div class="empty">
+
+        CARREGANDO HISTÓRICO...
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<div class="page-transition"></div>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getAuth,
+  onAuthStateChanged
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  doc,
+  getDoc
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app =
+initializeApp(firebaseConfig);
+
+const auth =
+getAuth(app);
+
+const db =
+getFirestore(app);
+
+const historicoGrid =
+document.getElementById("historicoGrid");
+
+const totalFinalizados =
+document.getElementById("totalFinalizados");
+
+const totalAprovados =
+document.getElementById("totalAprovados");
+
+const totalRecusados =
+document.getElementById("totalRecusados");
+
+const valorAprovado =
+document.getElementById("valorAprovado");
+
+onAuthStateChanged(auth, async(user) => {
+
+  if(!user){
+
+    window.location.href = "login.html";
+
+    return;
+
+  }
+
+  const userRef =
+  doc(db, "usuarios", user.uid);
+
+  const userSnap =
+  await getDoc(userRef);
+
+  if(!userSnap.exists()){
+
+    window.location.href = "painel.html";
+
+    return;
+
+  }
+
+  const data =
+  userSnap.data();
+
+  const permitido =
+
+    (data.equipe === "Founder" &&
+     data.ordem === 1)
+
+     ||
+
+    (data.equipe === "Manager" &&
+     data.ordem === 2);
+
+  if(!permitido){
+
+    window.location.href = "painel.html";
+
+    return;
+
+  }
+
+  carregarHistorico();
+
+});
+
+async function carregarHistorico(){
+
+  const q =
+  query(
+    collection(db, "pedidos"),
+    orderBy("criadoEm", "desc")
+  );
+
+  const snapshot =
+  await getDocs(q);
+
+  historicoGrid.innerHTML = "";
+
+  let finalizados = 0;
+  let aprovados = 0;
+  let recusados = 0;
+  let somaAprovados = 0;
+
+  snapshot.forEach((docItem) => {
+
+    const pedido =
+    docItem.data();
+
+    const status =
+    String(pedido.status || "")
+    .toLowerCase()
+    .trim();
+
+    const aprovado =
+    status === "aprovado" ||
+    status === "confirmado";
+
+    const recusado =
+    status === "recusado" ||
+    status === "cancelado";
+
+    if(!aprovado && !recusado){
+
+      return;
+
+    }
+
+    finalizados++;
+
+    if(aprovado){
+
+      aprovados++;
+
+      somaAprovados += Number(
+        pedido.valorLiquido || 0
+      );
+
+    }
+
+    if(recusado){
+
+      recusados++;
+
+    }
+
+    const statusClasse =
+    aprovado ? "aprovado" : "recusado";
+
+    const statusTexto =
+    aprovado ? "APROVADO" : "RECUSADO";
+
+    const itens =
+    pedido.itens || {};
+
+    historicoGrid.innerHTML += `
+
+      <div class="pedido-card">
+
+        <div class="pedido-top">
+
+          <div class="pedido-top-left">
+
+            <h2>${pedido.piloto || "Piloto"}</h2>
+
+            <span>👤 ${pedido.cliente || "Não informado"}</span>
+
+            <span>
+              📊 ${pedido.tipoVenda || "N/A"}
+              •
+              🕒 ${
+                pedido.data ||
+                new Date(pedido.criadoEm)
+                .toLocaleString("pt-BR")
+              }
+            </span>
+
+          </div>
+
+          <div class="status ${statusClasse}">
+
+            ${statusTexto}
+
+          </div>
+
+        </div>
+
+        <div class="itens-grid">
+
+          <div class="item-box">
+
+            <span>TABLETS</span>
+
+            <strong>${itens.tablet || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>CINTOS</span>
+
+            <strong>${itens.cinto || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>FLIPPERS</span>
+
+            <strong>${itens.flipper || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>PENDRIVES</span>
+
+            <strong>${itens.pendrive || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>PLACAS</span>
+
+            <strong>${itens.placa || 0}</strong>
+
+          </div>
+
+        </div>
+
+        <div class="pedido-bottom">
+
+          <div class="valor">
+
+            <span>COMISSÃO</span>
+
+            <strong>
+              $${Number(pedido.comissao || 0)
+              .toLocaleString("pt-BR")}
+            </strong>
+
+          </div>
+
+          <div class="valor">
+
+            <span>VALOR LÍQUIDO</span>
+
+            <strong>
+              $${Number(pedido.valorLiquido || 0)
+              .toLocaleString("pt-BR")}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  totalFinalizados.innerText =
+  finalizados;
+
+  totalAprovados.innerText =
+  aprovados;
+
+  totalRecusados.innerText =
+  recusados;
+
+  valorAprovado.innerText =
+  "$" + somaAprovados.toLocaleString("pt-BR");
+
+  if(finalizados === 0){
+
+    historicoGrid.innerHTML = `
+
+      <div class="empty">
+
+        NENHUM PEDIDO FINALIZADO ENCONTRADO
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+</script>
+
+<script src="script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Campeonatos - Control Racing</title>
+
+  <link rel="icon"
+        type="image/x-icon"
+        href="favicon.ico">
+
+  <link rel="stylesheet"
+        href="css/style.css">
+
+  <link rel="stylesheet"
+        href="css/style-campeonatos.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png"
+         alt="Control Racing">
+
+  </div>
+
+  <ul class="nav-links">
+
+    <li><a href="index.html">Home</a></li>
+
+    <li><a href="equipe.html">Equipe</a></li>
+
+    <li><a href="blacklist.html">Blacklist</a></li>
+
+    <li><a href="hall.html">Hall da Fama</a></li>
+
+    <li><a href="sobre.html">Sobre</a></li>
+
+    <li><a href="memorial.html">Memorial</a></li>
+
+    <li><a href="painel.html">Painel</a></li>
+
+  </ul>
+
+</nav>
+
+<!-- HERO -->
+
+<section class="hero">
+
+  <div class="championship-container">
+
+    <!-- HEADER -->
+
+    <div class="championship-header">
+
+      <h1 class="glitch"
+          data-text="CAMPEONATO">
+
+        CONTROL CHAMPIONSHIP #1
+
+      </h1>
+
+      <p>
+
+        Ranking oficial da temporada atual
+
+      </p>
+
+    </div>
+
+    <!-- TOP 3 -->
+
+    <div class="top3-grid"
+         id="top3-grid">
+
+    </div>
+
+    <!-- RANKING -->
+
+    <div class="ranking-table">
+
+      <div class="ranking-row header">
+
+        <span>POSIÇÃO</span>
+        <span>PILOTO</span>
+        <span>PONTOS</span>
+
+      </div>
+
+      <div id="ranking-grid"></div>
+
+    </div>
+
+    <button class="history-btn"
+        onclick="document.querySelector('.page-transition').classList.add('active');
+        setTimeout(() => {
+        window.location.href='corridas.html';
+        }, 450);">
+
+          VER HISTORICO DE CORRIDAS
+
+    </button>
+
+        <button class="history-btn"
+        onclick="document.querySelector('.page-transition').classList.add('active');
+        setTimeout(() => {
+        window.location.href='playoffs.html';
+        }, 450);">
+
+          PLAYOFFS
+
+    </button>
+
+</div>
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+  <div class="footer-line"></div>
+
+  <div class="footer-content">
+
+    <p>
+      © 2026 CONTROL RACING — Todos os direitos reservados
+    </p>
+
+    <span>
+      Equipe de Corrida de Servidores de GTARP
+    </span>
+
+  </div>
+
+</footer>
+
+<div class="page-transition"></div>
+<script src="script.js"></script>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getFirestore,
+  collection,
+  getDocs
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+/* LOAD CAMPEONATO */
+
+async function loadCampeonato(){
+
+  const top3Grid =
+  document.getElementById("top3-grid");
+
+  const rankingGrid =
+  document.getElementById("ranking-grid");
+
+  top3Grid.innerHTML = "";
+
+  rankingGrid.innerHTML = "";
+
+  /* BUSCA CORRIDAS */
+
+  const querySnapshot =
+  await getDocs(collection(db, "corridas"));
+
+  /* RANKING */
+
+  const ranking = {};
+
+  querySnapshot.forEach((docSnap) => {
+
+    const corrida = docSnap.data();
+
+    corrida.resultados.forEach((piloto) => {
+
+      if(!ranking[piloto.uid]){
+
+        ranking[piloto.uid] = {
+
+          uid: piloto.uid,
+
+          nome: piloto.nome,
+
+          foto: piloto.foto,
+
+          pontos: 0
+
+        };
+
+      }
+
+      ranking[piloto.uid].pontos += piloto.pontos;
+
+    });
+
+  });
+
+  /* CONVERTE ARRAY */
+
+  const rankingArray =
+  Object.values(ranking);
+
+  /* ORDENA */
+
+  rankingArray.sort((a,b) => {
+
+    return b.pontos - a.pontos;
+
+  });
+
+  /* RENDER */
+
+  rankingArray.forEach((piloto, index) => {
+
+    const posicao = index + 1;
+
+    /* TOP 3 */
+
+    if(posicao <= 3){
+
+      let classe = "";
+
+      if(posicao === 1){
+
+        classe = "first";
+
+      }
+
+      else if(posicao === 2){
+
+        classe = "second";
+
+      }
+
+      else{
+
+        classe = "third";
+
+      }
+
+      const card =
+      document.createElement("div");
+
+      card.classList.add("top-card");
+
+      card.classList.add(classe);
+
+      card.innerHTML = `
+
+        <div class="position">
+
+          #${posicao}
+
+        </div>
+
+        <img src="${piloto.foto}">
+
+        <h2>${piloto.nome}</h2>
+
+        <span>
+
+          ${piloto.pontos} PTS
+
+        </span>
+
+      `;
+
+      top3Grid.appendChild(card);
+
+    }
+
+    /* RESTANTE */
+
+    else{
+
+      const row =
+      document.createElement("div");
+
+      row.classList.add("ranking-row");
+
+      row.innerHTML = `
+
+        <span>
+
+          #${posicao}
+
+        </span>
+
+        <span>
+
+          ${piloto.nome}
+
+        </span>
+
+        <span>
+
+          ${piloto.pontos}
+
+        </span>
+
+      `;
+
+      rankingGrid.appendChild(row);
+
+    }
+
+  });
+
+}
+
+loadCampeonato();
+
+</script>
+
+</body>
+</html>

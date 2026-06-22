@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Control Racing</title>
+
+  <link rel="icon"
+        type="image/x-icon"
+        href="favicon.ico">
+
+  <link rel="stylesheet"
+        href="css/style-playoffs.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <!-- LOGO -->
+
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png"
+         alt="Control Racing">
+
+  </div>
+
+  <!-- MENU -->
+
+  <ul class="nav-links">
+
+    <li>
+      <a href="index.html">
+        Home
+      </a>
+    </li>
+
+    <li>
+      <a href="equipe.html">
+        Equipe
+      </a>
+    </li>
+
+    <li>
+      <a href="blacklist.html">
+        Blacklist
+      </a>
+    </li>
+
+    <li>
+      <a href="hall.html">
+        Hall da Fama
+      </a>
+    </li>
+
+    <li>
+      <a href="campeonatos.html">
+        Campeonatos
+      </a>
+    </li>
+
+    <li>
+      <a href="sobre.html">
+        Sobre
+      </a>
+    </li>
+
+    <li>
+      <a href="memorial.html">
+        Memorial
+      </a>
+    </li>
+
+    <li>
+      <a id="auth-link">
+        LOGIN
+      </a>
+    </li>
+
+  </ul>
+
+</nav>
+
+<!-- HERO -->
+
+<section class="hero">
+
+  <div class="playoffs-container">
+
+    <!-- HEADER -->
+
+    <div class="playoffs-header">
+
+      <h1 class="glitch"
+          data-text="PLAYOFFS">
+
+        PLAYOFFS
+
+      </h1>
+
+    </div>
+
+    <!-- BRACKET -->
+
+    <div class="bracket"
+         id="bracket">
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+  <div class="footer-line"></div>
+
+  <div class="footer-content">
+
+    <p>
+      © 2026 CONTROL RACING — Todos os direitos reservados
+    </p>
+
+    <span>
+      Equipe de Corrida de Servidores de GTARP
+    </span>
+
+  </div>
+
+</footer>
+
+<!-- TRANSITION -->
+
+<div class="page-transition"></div>
+
+<script src="script.js"></script>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getFirestore,
+  doc,
+  getDoc,
+  onSnapshot
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app =
+initializeApp(firebaseConfig);
+
+const db =
+getFirestore(app);
+
+/* ========================= */
+/* GET PILOT */
+/* ========================= */
+
+async function getPilot(uid){
+
+  if(!uid){
+
+    return {
+      nome: "---"
+    };
+
+  }
+
+  const pilotRef =
+  doc(db, "usuarios", uid);
+
+  const pilotSnap =
+  await getDoc(pilotRef);
+
+  if(pilotSnap.exists()){
+
+    return pilotSnap.data();
+
+  }
+
+  return {
+    nome: "---"
+  };
+
+}
+
+/* ========================= */
+/* CREATE PLAYER */
+/* ========================= */
+
+function createPlayer(
+  pilot,
+  isWinner = false,
+  isChampion = false
+){
+
+  const avatar =
+  pilot?.foto || 
+  "https://a.imagem.app/GYxzpt.png";
+
+  const name =
+  pilot?.nome || "AGUARDANDO";
+
+  return `
+
+    <div class="player
+      ${isWinner ? "winner" : ""}
+      ${isChampion ? "champion" : ""}">
+
+      <img
+        class="player-avatar"
+        src="${avatar}"
+        alt="${name}">
+
+      <span class="player-name">
+
+        ${name}
+
+      </span>
+
+    </div>
+
+  `;
+
+}
+
+/* ========================= */
+/* RENDER ROUND */
+/* ========================= */
+
+async function renderRound(
+  title,
+  matches,
+  extraClass = "",
+  isFinal = false
+){
+
+  let html = `
+
+    <div class="round ${extraClass}">
+
+      <h2>
+        ${title}
+      </h2>
+
+  `;
+
+  for(const match of matches){
+
+    const p1 =
+    await getPilot(match.piloto1);
+
+    const p2 =
+    await getPilot(match.piloto2);
+
+    html += `
+
+      <div class="match
+        ${isFinal ? "final" : ""}">
+
+        ${createPlayer(
+
+          p1,
+
+          match.vencedor === match.piloto1,
+
+          isFinal &&
+          match.vencedor === match.piloto1
+
+        )}
+
+        ${createPlayer(
+
+          p2,
+
+          match.vencedor === match.piloto2,
+
+          isFinal &&
+          match.vencedor === match.piloto2
+
+        )}
+
+      </div>
+
+    `;
+
+  }
+
+  html += `
+
+    </div>
+
+  `;
+
+  return html;
+
+}
+
+/* ========================= */
+/* LOAD PLAYOFFS */
+/* ========================= */
+
+async function loadPlayoffs(){
+
+  document.getElementById("bracket").innerHTML = "";
+
+  const playoffsRef =
+  doc(db, "playoffs", "temporadaAtual");
+
+  const playoffsSnap =
+  await getDoc(playoffsRef);
+
+  if(!playoffsSnap.exists()){
+
+    document.getElementById("bracket").innerHTML = `
+
+      <div class="round">
+
+        <h2>
+          Nenhum playoff criado
+        </h2>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  const data =
+  playoffsSnap.data();
+
+  const bracket =
+  document.getElementById("bracket");
+
+  bracket.innerHTML = "";
+
+  /* QUARTAS */
+
+  bracket.innerHTML += await renderRound(
+
+    "QUARTAS",
+
+    data.quartas || []
+
+  );
+
+  /* SEMIFINAL */
+
+  bracket.innerHTML += await renderRound(
+
+    "SEMIFINAL",
+
+    data.semifinais || [],
+
+    "semi-round"
+
+  );
+
+  /* FINAL */
+
+  bracket.innerHTML += await renderRound(
+
+    "FINAL",
+
+    data.final || [],
+
+    "final-round",
+
+    true
+
+  );
+
+}
+
+/* REALTIME PLAYOFFS */
+
+onSnapshot(
+
+  doc(db, "playoffs", "temporadaAtual"),
+
+  async () => {
+
+    await loadPlayoffs();
+
+  }
+
+);
+
+</script>
+
+<script type="module"
+        src="js/navbar-auth.js"></script>
+
+</body>
+</html>

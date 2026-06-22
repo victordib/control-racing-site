@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Caixa - Control Racing</title>
+
+  <link rel="stylesheet"
+        href="css/style.css">
+
+  <link rel="stylesheet"
+        href="css/style-caixa.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png"
+         alt="Control Racing">
+
+  </div>
+
+  <ul class="nav-links">
+
+    <li><a href="painel.html">Painel</a></li>
+
+    <li><a href="admin-pedidos.html">Pedidos</a></li>
+
+  </ul>
+
+</nav>
+
+<!-- PAGE -->
+
+<section class="caixa-page">
+
+  <div class="caixa-container">
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+      <h1>
+
+        CAIXA
+
+      </h1>
+
+      <p>
+
+        gerenciamento financeiro da equipe
+
+      </p>
+
+    </div>
+
+    <!-- SALDO -->
+
+    <div class="saldo-card">
+
+      <span>
+
+        SALDO ATUAL
+
+      </span>
+
+      <strong id="saldoAtual">
+
+        $0
+
+      </strong>
+
+    </div>
+
+    <!-- FORM -->
+
+    <div class="caixa-form-card">
+
+      <div class="form-grid">
+
+        <!-- TIPO -->
+
+        <div class="input-group">
+
+          <label>
+
+            Tipo
+
+          </label>
+
+          <select id="tipoMovimentacao">
+
+            <option value="entrada">
+
+              Entrada
+
+            </option>
+
+            <option value="saida">
+
+              Saída
+
+            </option>
+
+          </select>
+
+        </div>
+
+        <!-- VALOR -->
+
+        <div class="input-group">
+
+          <label>
+
+            Valor
+
+          </label>
+
+          <input type="number"
+                 id="valorMovimentacao"
+                 placeholder="Digite o valor">
+
+        </div>
+
+      </div>
+
+      <!-- MOTIVO -->
+
+      <div class="input-group">
+
+        <label>
+
+          Motivo
+
+        </label>
+
+        <textarea id="motivoMovimentacao"
+                  placeholder="Digite o motivo da movimentação"></textarea>
+
+      </div>
+
+      <!-- BUTTON -->
+
+      <button id="registrarBtn">
+
+        REGISTRAR MOVIMENTAÇÃO
+
+      </button>
+
+    </div>
+
+    <!-- HISTÓRICO -->
+
+    <div class="historico-header">
+
+      <h2>
+
+        HISTÓRICO
+
+      </h2>
+
+    </div>
+
+    <div class="historico-grid"
+         id="historicoGrid">
+
+      <div class="empty">
+
+        CARREGANDO HISTÓRICO...
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<div class="page-transition"></div>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getAuth,
+  onAuthStateChanged
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  increment,
+  addDoc,
+  collection,
+  getDocs,
+  orderBy,
+  query
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+/* ELEMENTS */
+
+const saldoAtual =
+document.getElementById("saldoAtual");
+
+const historicoGrid =
+document.getElementById("historicoGrid");
+
+/* USER */
+
+let usuarioNome = "";
+
+/* AUTH */
+
+onAuthStateChanged(auth, async(user) => {
+
+  if(!user){
+
+    window.location.href =
+    "login.html";
+
+    return;
+
+  }
+
+  const userRef =
+  doc(db, "usuarios", user.uid);
+
+  const userSnap =
+  await getDoc(userRef);
+
+  if(!userSnap.exists()){
+
+    window.location.href =
+    "painel.html";
+
+    return;
+
+  }
+
+  const data =
+  userSnap.data();
+
+  const permitido =
+
+    (data.equipe === "Founder"
+    && data.ordem === 1)
+
+    ||
+
+    (data.equipe === "Manager"
+    && data.ordem === 2);
+
+  if(!permitido){
+
+    window.location.href =
+    "painel.html";
+
+    return;
+
+  }
+
+  usuarioNome =
+  data.nome;
+
+  carregarSaldo();
+
+  carregarHistorico();
+
+});
+
+/* ========================= */
+/* CARREGAR SALDO */
+/* ========================= */
+
+async function carregarSaldo(){
+
+  const caixaRef =
+  doc(db, "financeiro", "caixa");
+
+  const caixaSnap =
+  await getDoc(caixaRef);
+
+  if(!caixaSnap.exists()){
+
+    await setDoc(caixaRef, {
+
+      saldo:0
+
+    });
+
+    saldoAtual.innerText =
+    "$0";
+
+    return;
+
+  }
+
+  const data =
+  caixaSnap.data();
+
+  saldoAtual.innerText =
+  "$" +
+  Number(data.saldo || 0)
+  .toLocaleString("pt-BR");
+
+}
+
+/* ========================= */
+/* REGISTRAR */
+/* ========================= */
+
+document
+.getElementById("registrarBtn")
+.addEventListener("click", async() => {
+
+  const tipo =
+  document
+  .getElementById("tipoMovimentacao")
+  .value;
+
+  const valor =
+  Number(
+    document
+    .getElementById("valorMovimentacao")
+    .value
+  );
+
+  const motivo =
+  document
+  .getElementById("motivoMovimentacao")
+  .value.trim();
+
+  if(!valor || valor <= 0){
+
+    alert("Digite um valor válido.");
+
+    return;
+
+  }
+
+  if(!motivo){
+
+    alert("Digite o motivo.");
+
+    return;
+
+  }
+
+  /* CAIXA */
+
+  const caixaRef =
+  doc(db, "financeiro", "caixa");
+
+  const valorFinal =
+  tipo === "entrada"
+  ? valor
+  : -valor;
+
+  await updateDoc(caixaRef, {
+
+    saldo: increment(valorFinal)
+
+  });
+
+  /* HISTÓRICO */
+
+  await addDoc(
+
+    collection(
+      db,
+      "financeiro",
+      "historico",
+      "movimentacoes"
+    ),
+
+    {
+
+      tipo:tipo,
+
+      valor:valor,
+
+      motivo:motivo,
+
+      responsavel:usuarioNome,
+
+      data:new Date()
+      .toLocaleString("pt-BR"),
+
+      timestamp:Date.now()
+
+    }
+
+  );
+
+  /* RESET */
+
+  document
+  .getElementById("valorMovimentacao")
+  .value = "";
+
+  document
+  .getElementById("motivoMovimentacao")
+  .value = "";
+
+  carregarSaldo();
+
+  carregarHistorico();
+
+});
+
+/* ========================= */
+/* HISTÓRICO */
+/* ========================= */
+
+async function carregarHistorico(){
+
+  historicoGrid.innerHTML = `
+  
+    <div class="empty">
+
+      CARREGANDO...
+
+    </div>
+
+  `;
+
+  const historicoRef =
+  collection(
+    db,
+    "financeiro",
+    "historico",
+    "movimentacoes"
+  );
+
+  const q =
+  query(
+    historicoRef,
+    orderBy("timestamp", "desc")
+  );
+
+  const snapshot =
+  await getDocs(q);
+
+  if(snapshot.empty){
+
+    historicoGrid.innerHTML = `
+    
+      <div class="empty">
+
+        NENHUMA MOVIMENTAÇÃO
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+  historicoGrid.innerHTML = "";
+
+  snapshot.forEach((docItem) => {
+
+    const item =
+    docItem.data();
+
+    historicoGrid.innerHTML += `
+
+      <div class="historico-card">
+
+        <div class="historico-top">
+
+          <div class="tipo ${item.tipo}">
+
+            ${item.tipo}
+
+          </div>
+
+          <strong>
+
+            $${Number(item.valor)
+            .toLocaleString("pt-BR")}
+
+          </strong>
+
+        </div>
+
+        <div class="historico-info">
+
+          <span>
+
+            ${item.motivo}
+
+          </span>
+
+          <small>
+
+            ${item.responsavel}
+            •
+            ${item.data}
+
+          </small>
+
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+</script>
+
+<script src="script.js"></script>
+
+</body>
+</html>

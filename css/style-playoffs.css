@@ -1,0 +1,870 @@
+:root{
+
+  --placeholder-avatar:
+  url("https://a.imagem.app/GYxzpt.png");
+
+}
+
+/* RESET */
+
+*{
+
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+
+}
+
+html{
+
+  scroll-behavior:smooth;
+
+}
+
+body{
+
+  font-family:'Orbitron',sans-serif;
+
+  background:#050505;
+
+  color:white;
+
+  overflow-x:hidden;
+
+  position:relative;
+
+}
+
+
+
+/* BACKGROUND */
+
+body::before{
+
+  content:"";
+
+  position:fixed;
+
+  inset:0;
+
+  background:url("https://a.imagem.app/GYziVJ.png")
+  center center/cover no-repeat;
+
+  filter:
+  brightness(0.18)
+  blur(4px);
+
+  transform:scale(1.05);
+
+  z-index:-3;
+
+}
+
+/* DARK OVERLAY */
+
+body::after{
+
+  content:"";
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+
+  linear-gradient(
+    180deg,
+    rgba(0,0,0,0.45),
+    rgba(0,0,0,0.94)
+  ),
+
+  radial-gradient(
+    circle at top,
+    rgba(0,229,255,0.12),
+    transparent 40%
+  );
+
+  z-index:-2;
+
+}
+
+/* HUD LINES */
+
+.hero::before{
+
+  content:"";
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+  repeating-linear-gradient(
+
+    to bottom,
+
+    rgba(255,255,255,0.015),
+
+    rgba(255,255,255,0.015) 1px,
+
+    transparent 1px,
+
+    transparent 3px
+
+  );
+
+  pointer-events:none;
+
+  z-index:-1;
+
+}
+
+/* HERO */
+
+.hero{
+
+  position:relative;
+
+  min-height:auto;
+
+  padding-top:120px;
+
+  padding-bottom:40px;
+
+  z-index:2;
+
+}
+
+/* CONTAINER */
+
+.playoffs-container{
+
+  width:100%;
+
+  max-width:1500px;
+
+  margin:auto;
+
+  padding:0 40px;
+
+}
+
+/* HEADER */
+
+.playoffs-header{
+
+  text-align:center;
+
+  margin-bottom:55px;
+
+}
+
+.playoffs-header h1{
+
+  font-size:72px;
+
+  font-weight:900;
+
+  letter-spacing:10px;
+
+  color:white;
+
+  position:relative;
+
+}
+
+/* GLITCH */
+
+.glitch{
+
+  position:relative;
+
+}
+
+.glitch::before,
+.glitch::after{
+
+  content:attr(data-text);
+
+  position:absolute;
+
+  left:0;
+  top:0;
+
+  width:100%;
+  height:100%;
+
+}
+
+.glitch::before{
+
+  color:#00E5FF;
+
+  z-index:-1;
+
+  transform:translate(2px,-2px);
+
+  opacity:0.7;
+
+}
+
+.glitch::after{
+
+  color:#ff004c;
+
+  z-index:-2;
+
+  transform:translate(-2px,2px);
+
+  opacity:0.5;
+
+}
+
+.playoffs-header p{
+
+  margin-top:18px;
+
+  color:#cfcfcf;
+
+  letter-spacing:4px;
+
+  font-size:13px;
+
+  text-transform:uppercase;
+
+}
+
+/* BRACKET */
+
+.bracket{
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:flex-start;
+
+  gap:55px;
+
+  overflow-x:auto;
+
+  padding-bottom:15px;
+
+}
+
+/* ROUND */
+
+.round{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:35px;
+
+  position:relative;
+
+}
+
+.round h2{
+
+  text-align:center;
+
+  color:#00E5FF;
+
+  font-size:16px;
+
+  letter-spacing:5px;
+
+  margin-bottom:10px;
+
+}
+
+/* MATCH */
+
+.match{
+
+  position:relative;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:14px;
+
+  position:relative;
+
+}
+
+/* ========================= */
+/* LINHAS QUARTAS → SEMIS */
+/* ========================= */
+
+.round:first-child .match::after{
+
+  content:"";
+
+  position:absolute;
+
+  top:50%;
+
+  right:-52px;
+
+  width:55px;
+
+  height:2px;
+
+  background:
+  rgba(0,229,255,0.22);
+
+}
+
+/* LINHAS VERTICAIS */
+
+.round:first-child .match:nth-child(3)::before,
+.round:first-child .match:nth-child(5)::before{
+
+  content:"";
+
+  position:absolute;
+
+  right:-52px;
+
+  top:-52px;
+
+  width:2px;
+
+  height:104px;
+
+  background:
+  rgba(0,229,255,0.22);
+
+}
+
+/* ========================= */
+/* LINHAS SEMIS → FINAL */
+/* ========================= */
+
+.semi-round .match::after{
+
+  content:"";
+
+  position:absolute;
+
+  top:50%;
+
+  right:-52px;
+
+  width:55px;
+
+  height:2px;
+
+  background:
+  rgba(0,229,255,0.22);
+
+}
+
+/* LINHA VERTICAL CENTRAL */
+
+.semi-round .match:nth-child(3)::before{
+
+  content:"";
+
+  position:absolute;
+
+  right:-52px;
+
+  top:-102px;
+
+  width:2px;
+
+  height:204px;
+
+  background:
+  rgba(0,229,255,0.22);
+
+}
+
+/* PLAYER CARD */
+
+.player{
+
+  width:240px;
+
+  min-height:60px;
+
+  display:flex;
+
+  align-items:center;
+
+  padding:14px 18px;
+
+  border-radius:18px;
+
+  background:
+
+  linear-gradient(
+    180deg,
+    rgba(18,18,18,0.92),
+    rgba(8,8,8,0.98)
+  );
+
+  border:
+  1px solid rgba(0,229,255,0.12);
+
+  box-shadow:
+  0 0 20px rgba(0,229,255,0.08);
+
+  backdrop-filter:blur(12px);
+
+  position:relative;
+
+  overflow:hidden;
+
+  transition:0.35s;
+
+  font-size:13px;
+
+}
+
+/* GLOW EFFECT */
+
+.player::before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  background:
+
+  linear-gradient(
+    120deg,
+    transparent,
+    rgba(0,229,255,0.08),
+    transparent
+  );
+
+  transform:translateX(-100%);
+
+  transition:0.6s;
+
+}
+
+.player:hover::before{
+
+  transform:translateX(100%);
+
+}
+
+.player:hover{
+
+  transform:translateY(-5px);
+
+  border:
+  1px solid rgba(0,229,255,0.45);
+
+  box-shadow:
+  0 0 35px rgba(0,229,255,0.18);
+
+}
+
+/* LOSER */
+
+.loser{
+
+  opacity:0.75;
+
+  border:
+  1px solid rgba(255,255,255,0.06);
+
+}
+
+/* FINAL */
+
+.final .player{
+
+  border:
+  1px solid rgba(255,215,0,0.30);
+
+}
+
+/* CHAMPION */
+
+.champion{
+
+  color:#FFD700;
+
+  border:
+  1px solid rgba(255,215,0,0.45);
+
+  box-shadow:
+  0 0 35px rgba(255,215,0,0.18);
+
+}
+
+.winner{
+
+  border:
+  1px solid rgba(0,229,255,0.45);
+
+  box-shadow:
+  0 0 25px rgba(0,229,255,0.16);
+
+}
+
+/* RESPONSIVO */
+
+@media(max-width:1200px){
+
+  .bracket{
+
+    justify-content:flex-start;
+
+    padding-left:20px;
+
+  }
+
+}
+
+@media(max-width:700px){
+
+  .playoffs-header h1{
+
+    font-size:46px;
+
+    letter-spacing:5px;
+
+  }
+
+  .player{
+
+    width:230px;
+
+  }
+
+}
+
+/* FOOTER */
+
+.footer{
+
+  position:relative;
+
+  width:100%;
+
+  margin-top:120px;
+
+  background:#050505;
+
+  overflow:hidden;
+
+}
+
+/* LINHA CYAN */
+
+.footer-line{
+
+  width:100%;
+
+  height:1px;
+
+  background:
+  linear-gradient(
+    90deg,
+    transparent,
+    rgba(0,229,255,0.8),
+    transparent
+  );
+
+  box-shadow:
+  0 0 15px rgba(0,229,255,0.35);
+
+}
+
+/* CONTEÚDO */
+
+.footer-content{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  padding:28px 60px;
+
+  max-width:1400px;
+
+  margin:auto;
+
+}
+
+/* TEXTO */
+
+.footer p{
+
+  color:white;
+
+  font-size:12px;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+  opacity:0.7;
+
+  margin:0;
+
+}
+
+/* DEV */
+
+.footer span{
+
+  color:#00E5FF;
+
+  font-size:12px;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+  opacity:0.8;
+
+}
+
+/* ========================= */
+/* NAVBAR */
+/* ========================= */
+
+.navbar{
+
+  position:fixed;
+
+  top:0;
+  left:0;
+
+  width:100%;
+
+  height:85px;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  padding:0 70px;
+
+  background:rgba(0,0,0,0.45);
+
+  backdrop-filter:blur(12px);
+
+  border-bottom:
+  1px solid rgba(0,229,255,0.08);
+
+  z-index:99999;
+
+}
+
+/* LOGO */
+
+.logo{
+
+  display:flex;
+
+  align-items:center;
+
+}
+
+.logo img{
+
+  height:48px;
+
+  object-fit:contain;
+
+}
+
+/* MENU */
+
+.nav-links{
+
+  display:flex;
+
+  flex-direction:row;
+
+  align-items:center;
+
+  justify-content:center;
+
+  gap:38px;
+
+  list-style:none;
+
+  margin:0;
+
+  padding:0;
+
+}
+
+/* LINKS */
+
+.nav-links li{
+
+  list-style:none;
+
+}
+
+.nav-links a{
+
+  position:relative;
+
+  display:inline-block;
+
+  color:white;
+
+  text-decoration:none;
+
+  font-size:12px;
+
+  font-weight:700;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+  transition:0.3s;
+
+  padding-bottom:8px;
+
+  cursor:pointer;
+
+}
+
+/* CYAN LINE */
+
+.nav-links a::after{
+
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  bottom:0;
+
+  width:0%;
+
+  height:2px;
+
+  background:#00E5FF;
+
+  transition:0.3s ease;
+
+  box-shadow:
+  0 0 10px rgba(0,229,255,0.7);
+
+}
+
+/* HOVER */
+
+.nav-links a:hover{
+
+  color:#00E5FF;
+
+}
+
+.nav-links a:hover::after{
+
+  width:100%;
+
+}
+
+/* ========================= */
+/* AJUSTE DOS ROUNDS */
+/* ========================= */
+
+.semi-round{
+
+  padding-top:108px;
+
+}
+
+.final-round{
+
+  padding-top:235px;
+
+}
+
+/* ========================= */
+/* PLAYER AVATAR */
+/* ========================= */
+
+.player{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:16px;
+
+}
+
+.player-avatar{
+
+  width:58px;
+  height:58px;
+
+  min-width:58px;
+
+  border-radius:50%;
+
+  overflow:hidden;
+
+  border:
+  2px solid rgba(0,229,255,0.35);
+
+  box-shadow:
+  0 0 18px rgba(0,229,255,0.18);
+
+}
+
+.player-avatar img{
+
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+}
+
+.player-info{
+
+  display:flex;
+
+  align-items:center;
+
+}
+
+.player-info span{
+
+  font-size:13px;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+}
+
+/* CAMPEÃO */
+
+.champion .player-avatar{
+
+  border:
+  2px solid rgba(255,215,0,0.65);
+
+  box-shadow:
+  0 0 22px rgba(255,215,0,0.35);
+
+}

@@ -1,0 +1,501 @@
+piloto:<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Meus Pedidos - Control Racing</title>
+
+  <link rel="stylesheet"
+        href="css/style-meus-pedidos.css">
+
+  <link rel="stylesheet"
+        href="css/style.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png">
+
+  </div>
+
+  <ul class="nav-links">
+
+    <li><a href="painel.html">Painel</a></li>
+
+    <li><a href="pedidos.html">Novo Pedido</a></li>
+
+  </ul>
+
+</nav>
+
+<!-- PAGE -->
+
+<section class="page">
+
+  <div class="container">
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+      <h1>
+
+        MEUS PEDIDOS
+
+      </h1>
+
+      <p>
+
+        histórico completo de vendas
+
+      </p>
+
+    </div>
+
+    <!-- RESUMO -->
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+
+        <span>TOTAL</span>
+
+        <strong id="totalPedidos">
+
+          0
+
+        </strong>
+
+      </div>
+
+      <div class="stat-card">
+
+        <span>APROVADOS</span>
+
+        <strong id="aprovados">
+
+          0
+
+        </strong>
+
+      </div>
+
+      <div class="stat-card">
+
+        <span>PENDENTES</span>
+
+        <strong id="pendentes">
+
+          0
+
+        </strong>
+
+      </div>
+
+      <div class="stat-card">
+
+        <span>COMISSÃO TOTAL</span>
+
+        <strong id="comissaoTotal">
+
+          $0
+
+        </strong>
+
+      </div>
+
+      <div class="stat-card">
+
+        <span>VALOR TOTAL</span>
+
+        <strong id="valorTotal">
+
+          $0
+
+        </strong>
+
+      </div>
+
+    </div>
+
+    <!-- PEDIDOS -->
+
+    <div class="pedidos-grid"
+         id="pedidosGrid">
+
+      <div class="empty">
+
+        CARREGANDO PEDIDOS...
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<div class="page-transition"></div>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getAuth,
+  onAuthStateChanged
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  doc,
+  getDoc
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+/* ELEMENTS */
+
+const pedidosGrid =
+document.getElementById("pedidosGrid");
+
+const totalPedidos =
+document.getElementById("totalPedidos");
+
+const aprovados =
+document.getElementById("aprovados");
+
+const pendentes =
+document.getElementById("pendentes");
+
+const comissaoTotal =
+document.getElementById("comissaoTotal");
+
+const valorTotal =
+document.getElementById("valorTotal");
+
+/* AUTH */
+
+let pilotoAtual = {};
+
+onAuthStateChanged(auth, async(user) => {
+
+  if(!user){
+
+    window.location.href = "login.html";
+
+    return;
+
+  }
+
+  const userRef =
+  doc(db, "usuarios", user.uid);
+
+  const userSnap =
+  await getDoc(userRef);
+
+  if(!userSnap.exists()){
+
+    window.location.href = "login.html";
+
+    return;
+
+  }
+
+  pilotoAtual = {
+    uid:user.uid,
+    ...userSnap.data()
+  };
+
+  carregarPedidos(user);
+
+});
+
+/* PEDIDOS */
+
+async function carregarPedidos(user){
+
+  const pedidosRef =
+  collection(db, "pedidos");
+
+  const q =
+  query(
+    pedidosRef,
+    orderBy("criadoEm", "desc")
+  );
+
+  const snapshot =
+  await getDocs(q);
+
+  pedidosGrid.innerHTML = "";
+
+  let total = 0;
+  let totalAprovados = 0;
+  let totalPendentes = 0;
+  let somaComissao = 0;
+  let soma = 0;
+
+  snapshot.forEach((docItem) => {
+
+    const pedido =
+    docItem.data();
+
+    const mesmoUid =
+    pedido.pilotoUid === user.uid;
+
+    const mesmoNome =
+    String(pedido.piloto || "")
+    .toLowerCase()
+    .trim()
+    ===
+    String(pilotoAtual.nome || "")
+    .toLowerCase()
+    .trim();
+
+    if(!mesmoUid && !mesmoNome){
+
+      return;
+
+    }
+
+    total++;
+
+    const statusPedido =
+    String(pedido.status || "")
+    .toLowerCase()
+    .trim();
+
+    const pedidoAprovado =
+    statusPedido === "aprovado" ||
+    statusPedido === "confirmado";
+
+    if(pedidoAprovado){
+
+      totalAprovados++;
+
+      soma += Number(
+        pedido.valorLiquido || 0
+      );
+
+      somaComissao += Number(
+        pedido.comissao || 0
+      );
+
+    }
+
+    if(statusPedido === "pendente"){
+
+      totalPendentes++;
+
+    }
+
+    const itens =
+    pedido.itens || {};
+
+    pedidosGrid.innerHTML += `
+
+      <div class="pedido-card">
+
+        <div class="pedido-top">
+
+          <div>
+
+            <h2>
+
+                ${pedido.cliente || "Cliente"}
+
+            </h2>
+
+            <span class="tipo-venda">
+
+              ${pedido.tipoVenda}
+
+            <span>
+
+              ${
+                pedido.data
+
+                ||
+
+                new Date(
+                  pedido.criadoEm
+                ).toLocaleString("pt-BR")
+              }
+
+            </span>
+
+          </div>
+
+          <div class="status ${pedido.status}">
+
+            ${pedido.status}
+
+          </div>
+
+        </div>
+
+        <div class="itens-grid">
+
+          <div class="item-box">
+
+            <span>TABLETS</span>
+
+            <strong>${itens.tablet || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>CINTOS</span>
+
+            <strong>${itens.cinto || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>FLIPPERS</span>
+
+            <strong>${itens.flipper || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>PENDRIVES</span>
+
+            <strong>${itens.pendrive || 0}</strong>
+
+          </div>
+
+          <div class="item-box">
+
+            <span>PLACAS</span>
+
+            <strong>${itens.placa || 0}</strong>
+
+          </div>
+
+        </div>
+
+        <div class="pedido-bottom">
+
+          <div class="valor-box">
+
+            <span>COMISSÃO</span>
+
+            <strong>
+
+              $${Number(
+                pedido.comissao || 0
+              ).toLocaleString("pt-BR")}
+
+            </strong>
+
+          </div>
+
+          <div class="valor-box">
+
+            <span>VALOR LIQUIDO</span>
+
+            <strong>
+
+              $${Number(
+                pedido.valorLiquido || 0
+              ).toLocaleString("pt-BR")}
+
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  totalPedidos.innerText = total;
+
+  aprovados.innerText = totalAprovados;
+
+  pendentes.innerText = totalPendentes;
+
+  valorTotal.innerText =
+  "$" + soma.toLocaleString("pt-BR");
+
+  comissaoTotal.innerText =
+  "$" + somaComissao
+  .toLocaleString("pt-BR");
+
+  if(total === 0){
+
+    pedidosGrid.innerHTML = `
+
+      <div class="empty">
+
+        VOCÊ AINDA NÃO POSSUI PEDIDOS
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+</script>
+
+<script src="script.js"></script>
+
+</body>
+</html>

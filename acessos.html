@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Control Racing - Acessos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <h1>REGISTRO DE ACESSOS</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Navegador</th>
+      </tr>
+    </thead>
+    <tbody id="listaAcessos"></tbody>
+  </table>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      collection,
+      query,
+      orderBy,
+      limit,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "control-racing.firebaseapp.com",
+      projectId: "control-racing",
+      storageBucket: "control-racing.firebasestorage.app",
+      messagingSenderId: "114488486568",
+      appId: "SEU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const lista = document.getElementById("listaAcessos");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const userRef = doc(db, "usuarios", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        window.location.href = "painel.html";
+        return;
+      }
+
+      const dados = userSnap.data();
+
+      const podeVer =
+        dados.ordem === 1 ||
+        dados.ordem === 2 ||
+        dados.equipe === "Founder" ||
+        dados.equipe === "Manager";
+
+      if (!podeVer) {
+        alert("Acesso negado.");
+        window.location.href = "painel.html";
+        return;
+      }
+
+      const q = query(
+        collection(db, "acessos"),
+        orderBy("data", "desc"),
+        limit(100)
+      );
+
+      const snap = await getDocs(q);
+
+      lista.innerHTML = "";
+
+      snap.forEach((doc) => {
+        const acesso = doc.data();
+
+        const data = acesso.data?.toDate
+          ? acesso.data.toDate().toLocaleString("pt-BR")
+          : "Sem data";
+
+        lista.innerHTML += `
+          <tr>
+            <td>${data}</td>
+            <td>${acesso.nome || "-"}</td>
+            <td>${acesso.email || "-"}</td>
+            <td>${acesso.navegador || "-"}</td>
+          </tr>
+        `;
+      });
+    });
+  </script>
+
+</body>
+</html>

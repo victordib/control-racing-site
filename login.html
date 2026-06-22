@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Control Racing - Login</title>
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="css/style-login.css">
+  <link rel="stylesheet" href="css/style.css">
+ 
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<nav class="navbar">
+
+  <!-- LOGO -->
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png"
+         alt="Control Racing">
+
+  </div>
+
+  <!-- MENU -->
+  <ul class="nav-links">
+
+    <li><a href="index.html">Home</a></li>
+
+    <li><a href="equipe.html">Equipe</a></li>
+
+    <li><a href="blacklist.html">Blacklist</a></li>
+
+    <li><a href="hall.html">Hall da Fama</a></li>
+
+    <li><a href="sobre.html">Sobre</a></li>
+
+    <li><a href="memorial.html">Memorial</a></li>
+
+  </ul>
+
+</nav>
+
+<!-- BACKGROUND -->
+
+<div class="login-bg">
+
+  <img src="https://a.imagem.app/GYziVJ.png">
+
+</div>
+
+<!-- OVERLAY -->
+
+<div class="overlay"></div>
+
+<!-- HUD -->
+
+<div class="hud-lines"></div>
+
+<!-- LOGIN -->
+
+<div class="login-container">
+
+  <div class="login-card">
+
+    <!-- LOGO -->
+
+    <img src="https://a.imagem.app/GYxzpt.png"
+         class="logo">
+
+    <!-- SYSTEM -->
+
+    <span class="system-text">
+
+      CONTROL RACING NETWORK
+
+    </span>
+
+    <!-- TITLE -->
+
+    <h1>
+      AREA DO PILOTO
+    </h1>
+
+    <!-- EMAIL -->
+
+    <div class="input-group">
+
+      <input type="email"
+             id="email"
+             placeholder="E-mail">
+
+    </div>
+
+    <!-- PASSWORD -->
+
+    <div class="input-group">
+
+      <input type="password"
+             id="password"
+             placeholder="Senha">
+
+    </div>
+
+    <!-- LOGIN -->
+
+    <button id="loginBtn">
+
+      ENTRAR
+
+    </button>
+
+  </div>
+
+</div>
+
+  <!-- FOOTER -->
+
+<footer class="footer">
+
+  <div class="footer-line"></div>
+
+  <div class="footer-content">
+
+    <p>
+      © 2026 CONTROL RACING — Todos os direitos reservados
+    </p>
+
+    <span>
+      Equipe de Corrida de Servidores de GTARP
+    </span>
+
+  </div>
+
+</footer>
+
+<!-- TRANSITION -->
+
+<div class="page-transition"></div>
+<script src="script.js"></script>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getAuth,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  setPersistence,
+  browserLocalPersistence
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+
+/* INPUTS */
+
+const email =
+document.getElementById("email");
+
+const password =
+document.getElementById("password");
+
+/* ENTER PARA LOGAR */
+
+[email, password].forEach(input => {
+
+  input.addEventListener("keydown", (event) => {
+
+    if(event.key === "Enter"){
+
+      document
+      .getElementById("loginBtn")
+      .click();
+
+    }
+
+  });
+
+});
+
+/* LOGIN */
+
+document
+.getElementById("loginBtn")
+.addEventListener("click", async () => {
+
+  try{
+
+    await setPersistence(
+      auth,
+      browserLocalPersistence
+    );
+    
+    const cred = await signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+
+    const user = cred.user;
+
+    const userRef = doc(db, "usuarios", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    let nomeUsuario = "Usuário";
+
+    if (userSnap.exists()) {
+      nomeUsuario = userSnap.data().nome || user.email;
+    }
+
+    await addDoc(collection(db, "acessos"), {
+      uid: user.uid,
+      email: user.email,
+      nome: nomeUsuario,
+      data: serverTimestamp(),
+      navegador: navigator.userAgent
+    });
+
+    window.location.href = "painel.html";
+
+  }catch(error){
+
+    console.error(error);
+    alert("Login inválido.");
+
+  }
+
+});
+
+/* RESET PASSWORD */
+
+document
+.getElementById("resetBtn")
+.addEventListener("click", async () => {
+
+  if(!email.value){
+
+    alert("Digite seu e-mail.");
+
+    return;
+
+  }
+
+  try{
+
+    await sendPasswordResetEmail(
+      auth,
+      email.value
+    );
+
+    alert("E-mail de recuperação enviado!");
+
+  }catch(error){
+
+    alert(error.message);
+
+  }
+
+});
+
+</script>
+
+<div class="page-transition"></div>
+<script src="script.js"></script>
+<script type="module" src="js/login.js"></script>
+</body>
+</html>

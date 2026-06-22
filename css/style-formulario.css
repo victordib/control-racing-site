@@ -1,0 +1,969 @@
+/* ========================= */
+/* ROOT */
+/* ========================= */
+
+:root{
+
+  --cyan:#00E5FF;
+
+  --cyan-soft:
+  rgba(0,229,255,0.18);
+
+  --cyan-border:
+  rgba(0,229,255,0.12);
+
+}
+
+/* ========================= */
+/* RESET */
+/* ========================= */
+
+*{
+
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+
+}
+
+html{
+
+  scroll-behavior:smooth;
+
+}
+
+body{
+
+  font-family:'Orbitron',sans-serif;
+
+  background:#050505;
+
+  color:white;
+
+  overflow-x:hidden;
+
+  position:relative;
+
+}
+
+/* ========================= */
+/* BACKGROUND */
+/* ========================= */
+
+body::before{
+
+  content:"";
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+  url("https://a.imagem.app/GYziVJ.png")
+  center center/cover no-repeat;
+
+  filter:
+  brightness(0.18)
+  blur(4px);
+
+  transform:scale(1.05);
+
+  z-index:-3;
+
+}
+
+/* ========================= */
+/* OVERLAY */
+/* ========================= */
+
+body::after{
+
+  content:"";
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+
+  linear-gradient(
+    180deg,
+    rgba(0,0,0,0.45),
+    rgba(0,0,0,0.94)
+  ),
+
+  radial-gradient(
+    circle at top,
+    rgba(0,229,255,0.12),
+    transparent 40%
+  );
+
+  z-index:-2;
+
+}
+
+/* ========================= */
+/* HUD LINES */
+/* ========================= */
+
+.hero::before{
+
+  content:"";
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+  repeating-linear-gradient(
+
+    to bottom,
+
+    rgba(255,255,255,0.015),
+
+    rgba(255,255,255,0.015) 1px,
+
+    transparent 1px,
+
+    transparent 3px
+
+  );
+
+  pointer-events:none;
+
+  z-index:-1;
+
+}
+
+/* ========================= */
+/* HERO */
+/* ========================= */
+
+.hero{
+
+  position:relative;
+
+  min-height:100vh;
+
+  padding-top:140px;
+
+  padding-bottom:80px;
+
+  display:flex;
+
+  justify-content:center;
+
+  align-items:center;
+
+  z-index:2;
+
+}
+
+/* ========================= */
+/* CONTAINER */
+/* ========================= */
+
+.form-container{
+
+  width:100%;
+
+  max-width:850px;
+
+  padding:0 25px;
+
+}
+
+/* ========================= */
+/* HEADER */
+/* ========================= */
+
+.form-header{
+
+  text-align:center;
+
+  margin-bottom:45px;
+
+}
+
+.form-header h1{
+
+  font-size:68px;
+
+  font-weight:900;
+
+  letter-spacing:10px;
+
+  color:white;
+
+  position:relative;
+
+}
+
+/* ========================= */
+/* GLITCH */
+/* ========================= */
+
+.glitch{
+
+  position:relative;
+
+}
+
+.glitch::before,
+.glitch::after{
+
+  content:attr(data-text);
+
+  position:absolute;
+
+  left:0;
+  top:0;
+
+  width:100%;
+  height:100%;
+
+}
+
+.glitch::before{
+
+  color:#00E5FF;
+
+  transform:
+  translate(2px,-2px);
+
+  opacity:0.7;
+
+  z-index:-1;
+
+}
+
+.glitch::after{
+
+  color:#ff004c;
+
+  transform:
+  translate(-2px,2px);
+
+  opacity:0.45;
+
+  z-index:-2;
+
+}
+
+/* ========================= */
+/* SUBTITLE */
+/* ========================= */
+
+.championship-subtitle{
+
+  margin-top:18px;
+
+  color:#cfcfcf;
+
+  letter-spacing:4px;
+
+  font-size:13px;
+
+  text-transform:uppercase;
+
+}
+
+/* ========================= */
+/* INFO BOX */
+/* ========================= */
+
+.championship-info{
+
+  position:relative;
+
+  margin-bottom:35px;
+
+  padding:35px;
+
+  border-radius:28px;
+
+  background:
+
+  linear-gradient(
+    180deg,
+    rgba(18,18,18,0.92),
+    rgba(8,8,8,0.98)
+  );
+
+  border:
+  1px solid var(--cyan-border);
+
+  box-shadow:
+  0 0 30px rgba(0,229,255,0.08);
+
+  backdrop-filter:blur(14px);
+
+  overflow:hidden;
+
+}
+
+/* LIGHT EFFECT */
+
+.championship-info::before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  background:
+
+  linear-gradient(
+    120deg,
+    transparent,
+    rgba(0,229,255,0.05),
+    transparent
+  );
+
+  transform:translateX(-100%);
+
+  animation:
+  hudshine 7s linear infinite;
+
+}
+
+@keyframes hudshine{
+
+  100%{
+
+    transform:translateX(100%);
+
+  }
+
+}
+
+.championship-info h2{
+
+  color:var(--cyan);
+
+  font-size:18px;
+
+  letter-spacing:5px;
+
+  margin-bottom:20px;
+
+}
+
+.championship-info p{
+
+  color:#d8d8d8;
+
+  line-height:1.9;
+
+  font-size:14px;
+
+  letter-spacing:1px;
+
+}
+
+/* ========================= */
+/* FORM CARD */
+/* ========================= */
+
+.form-card{
+
+  position:relative;
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:28px;
+
+  padding:40px;
+
+  border-radius:30px;
+
+  background:
+
+  linear-gradient(
+    180deg,
+    rgba(18,18,18,0.92),
+    rgba(8,8,8,0.98)
+  );
+
+  border:
+  1px solid var(--cyan-border);
+
+  box-shadow:
+  0 0 35px rgba(0,229,255,0.08);
+
+  backdrop-filter:blur(14px);
+
+  overflow:hidden;
+
+}
+
+/* CYAN GLOW */
+
+.form-card::before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  background:
+
+  linear-gradient(
+    120deg,
+    transparent,
+    rgba(0,229,255,0.06),
+    transparent
+  );
+
+  transform:translateX(-100%);
+
+  animation:
+  formGlow 6s linear infinite;
+
+}
+
+@keyframes formGlow{
+
+  100%{
+
+    transform:translateX(100%);
+
+  }
+
+}
+
+/* ========================= */
+/* INPUT GROUP */
+/* ========================= */
+
+.input-group{
+
+  display:flex;
+
+  flex-direction:column;
+
+  gap:12px;
+
+}
+
+.input-group label{
+
+  color:var(--cyan);
+
+  font-size:12px;
+
+  letter-spacing:4px;
+
+  text-transform:uppercase;
+
+}
+
+/* ========================= */
+/* INPUTS */
+/* ========================= */
+
+.input-group input{
+
+  width:100%;
+
+  height:62px;
+
+  padding:0 22px;
+
+  border-radius:18px;
+
+  border:
+  1px solid rgba(255,255,255,0.08);
+
+  background:
+  rgba(255,255,255,0.03);
+
+  color:white;
+
+  font-family:'Orbitron',sans-serif;
+
+  font-size:13px;
+
+  letter-spacing:2px;
+
+  outline:none;
+
+  transition:0.35s;
+
+  backdrop-filter:blur(10px);
+
+}
+
+.input-group input::placeholder{
+
+  color:rgba(255,255,255,0.35);
+
+}
+
+.input-group input:focus{
+
+  border:
+  1px solid rgba(0,229,255,0.45);
+
+  box-shadow:
+  0 0 20px rgba(0,229,255,0.15);
+
+  transform:translateY(-2px);
+
+}
+
+/* ========================= */
+/* BUTTON */
+/* ========================= */
+
+#submitBtn{
+
+  height:62px;
+
+  border:none;
+
+  border-radius:18px;
+
+  background:
+
+  linear-gradient(
+    90deg,
+    rgba(0,229,255,0.18),
+    rgba(0,229,255,0.08)
+  );
+
+  border:
+  1px solid rgba(0,229,255,0.28);
+
+  color:white;
+
+  font-family:'Orbitron',sans-serif;
+
+  font-size:13px;
+
+  font-weight:700;
+
+  letter-spacing:4px;
+
+  cursor:pointer;
+
+  transition:0.35s;
+
+  position:relative;
+
+  overflow:hidden;
+
+}
+
+/* BUTTON GLOW */
+
+#submitBtn::before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  background:
+
+  linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.18),
+    transparent
+  );
+
+  transform:translateX(-100%);
+
+  transition:0.6s;
+
+}
+
+#submitBtn:hover::before{
+
+  transform:translateX(100%);
+
+}
+
+#submitBtn:hover{
+
+  transform:translateY(-4px);
+
+  border:
+  1px solid rgba(0,229,255,0.55);
+
+  box-shadow:
+  0 0 30px rgba(0,229,255,0.18);
+
+}
+
+/* ========================= */
+/* FOOTER */
+/* ========================= */
+
+.footer{
+
+  position:relative;
+
+  width:100%;
+
+  margin-top:100px;
+
+  background:#050505;
+
+  overflow:hidden;
+
+}
+
+.footer-line{
+
+  width:100%;
+
+  height:1px;
+
+  background:
+  linear-gradient(
+    90deg,
+    transparent,
+    rgba(0,229,255,0.8),
+    transparent
+  );
+
+  box-shadow:
+  0 0 15px rgba(0,229,255,0.35);
+
+}
+
+.footer-content{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  padding:28px 60px;
+
+  max-width:1400px;
+
+  margin:auto;
+
+}
+
+.footer p{
+
+  color:white;
+
+  font-size:12px;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+  opacity:0.7;
+
+}
+
+.footer span{
+
+  color:#00E5FF;
+
+  font-size:12px;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+  opacity:0.8;
+
+}
+
+/* ========================= */
+/* NAVBAR */
+/* ========================= */
+
+.navbar{
+
+  position:fixed;
+
+  top:0;
+  left:0;
+
+  width:100%;
+
+  height:85px;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  padding:0 70px;
+
+  background:rgba(0,0,0,0.45);
+
+  backdrop-filter:blur(12px);
+
+  border-bottom:
+  1px solid rgba(0,229,255,0.08);
+
+  z-index:99999;
+
+}
+
+/* LOGO */
+
+.logo{
+
+  display:flex;
+
+  align-items:center;
+
+}
+
+.logo img{
+
+  height:48px;
+
+  object-fit:contain;
+
+}
+
+/* MENU */
+
+.nav-links{
+
+  display:flex;
+
+  align-items:center;
+
+  gap:38px;
+
+  list-style:none;
+
+}
+
+.nav-links a{
+
+  position:relative;
+
+  display:inline-block;
+
+  color:white;
+
+  text-decoration:none;
+
+  font-size:12px;
+
+  font-weight:700;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+  transition:0.3s;
+
+  padding-bottom:8px;
+
+  cursor:pointer;
+
+}
+
+/* CYAN LINE */
+
+.nav-links a::after{
+
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  bottom:0;
+
+  width:0%;
+
+  height:2px;
+
+  background:#00E5FF;
+
+  transition:0.3s ease;
+
+  box-shadow:
+  0 0 10px rgba(0,229,255,0.7);
+
+}
+
+.nav-links a:hover{
+
+  color:#00E5FF;
+
+}
+
+.nav-links a:hover::after{
+
+  width:100%;
+
+}
+
+/* ========================= */
+/* RESPONSIVO */
+/* ========================= */
+
+@media(max-width:900px){
+
+  .form-header h1{
+
+    font-size:48px;
+
+    letter-spacing:5px;
+
+  }
+
+  .championship-info,
+  .form-card{
+
+    padding:28px;
+
+  }
+
+  .footer-content{
+
+    flex-direction:column;
+
+    gap:15px;
+
+    text-align:center;
+
+  }
+
+}
+
+@media(max-width:650px){
+
+  .navbar{
+
+    padding:0 20px;
+
+  }
+
+  .nav-links{
+
+    gap:18px;
+
+    flex-wrap:wrap;
+
+    justify-content:flex-end;
+
+  }
+
+  .nav-links a{
+
+    font-size:10px;
+
+  }
+
+  .form-header h1{
+
+    font-size:38px;
+
+  }
+
+  .championship-info p{
+
+    font-size:13px;
+
+  }
+
+  .input-group input{
+
+    height:56px;
+
+    font-size:12px;
+
+  }
+
+  #submitBtn{
+
+    height:56px;
+
+    font-size:12px;
+
+  }
+
+}
+
+.championship-description{
+
+  line-height: 1.9;
+
+  white-space: normal;
+
+}
+
+.championship-description b{
+
+  color:#00E5FF;
+
+  letter-spacing:2px;
+
+}
+
+/* STATUS INSCRIÇÃO */
+
+.status-inscricao{
+
+  width:100%;
+
+  margin-bottom:25px;
+
+  padding:18px;
+
+  border-radius:18px;
+
+  text-align:center;
+
+  font-size:13px;
+
+  letter-spacing:2px;
+
+  text-transform:uppercase;
+
+  backdrop-filter:blur(10px);
+
+}
+
+.status-open{
+
+  color:#00E5FF;
+
+  background:
+  rgba(0,229,255,0.08);
+
+  border:
+  1px solid rgba(0,229,255,0.25);
+
+  box-shadow:
+  0 0 25px rgba(0,229,255,0.08);
+
+}
+
+.status-closed{
+
+  color:#ff5b5b;
+
+  background:
+  rgba(255,0,0,0.08);
+
+  border:
+  1px solid rgba(255,0,0,0.25);
+
+  box-shadow:
+  0 0 25px rgba(255,0,0,0.08);
+
+}

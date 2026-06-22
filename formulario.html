@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Formulário - Control Racing</title>
+
+  <link rel="icon"
+        type="image/x-icon"
+        href="favicon.ico">
+
+  <link rel="stylesheet"
+        href="css/style-formulario.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png"
+         alt="Control Racing">
+
+  </div>
+
+  <ul class="nav-links">
+
+    <li><a href="index.html">Home</a></li>
+
+    <li><a href="equipe.html">Equipe</a></li>
+
+    <li><a href="blacklist.html">Blacklist</a></li>
+
+    <li><a href="hall.html">Hall da Fama</a></li>
+
+    <li><a href="sobre.html">Sobre</a></li>
+
+    <li><a href="memorial.html">Memorial</a></li>
+
+    <li>
+      <a id="auth-link">
+        LOGIN
+      </a>
+    </li>
+
+  </ul>
+
+</nav>
+
+<!-- HERO -->
+
+<section class="hero">
+
+  <div class="form-container">
+
+    <!-- HEADER -->
+
+    <div class="form-header">
+
+      <h1 class="glitch"
+          data-text="INSCRIÇÕES">
+
+        INSCRIÇÕES
+
+      </h1>
+
+      <p class="championship-subtitle">
+
+        City Camp Control Racing #1
+
+      </p>
+
+    </div>
+
+    <!-- INFO -->
+
+    <div class="championship-info">
+
+      <h2>
+        COMO FUNCIONARÁ
+      </h2>
+
+      <p>
+
+        Prove suas habilidades no underground!<br><br>
+        A Control traz a 1ª edição do City Camp pra você piloto que quer se provar no cenário e se consolidar como um dos melhores!<br><br>
+        
+        <b>Classificatório:</b><br>
+        - 5 corridas de classificação;<br>
+        - 12 melhores avançam para a fase final;<br><br>
+
+        <b>Fase Final:</b><br>
+        - 2 corridas entre os finalistas, duas chances de pontuar.<br>
+        - Top 3 melhor pontuado vence o campeonato;<br><br>
+
+        <b>Premiações:</b><br>
+        1º Lugar - 170 RACs + Placa Personalizada - Pontos para o Campeonato Final;<br>
+        2º Lugar - 120 RACs + Placa Personalizada - Pontos para o Campeonato Final;<br>
+        3º Lugar - 100 RACs + Placa Personalizada - Pontos para o Campeonato Final;<br>
+        4º ao 10º Lugar - Pontos para o Campeonato Final;
+
+      </p>
+
+    </div>
+
+    <div id="statusInscricao"
+     class="status-inscricao">
+
+      CARREGANDO...
+
+    </div>
+
+    <!-- FORM -->
+
+    <div class="form-card">
+
+      <div class="input-group">
+
+        <label>
+          NOME NO TABLET
+        </label>
+
+        <input type="text"
+               id="tabletNome"
+               placeholder="Digite seu nome no tablet">
+
+      </div>
+
+      <div class="input-group">
+
+        <label>
+          CARRO
+        </label>
+
+        <input type="text"
+               id="carro"
+               placeholder="Digite o carro utilizado">
+
+      </div>
+
+      <button id="submitBtn">
+
+        ENVIAR INSCRIÇÃO
+
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+  <div class="footer-line"></div>
+
+  <div class="footer-content">
+
+    <p>
+      © 2026 CONTROL RACING — Todos os direitos reservados
+    </p>
+
+    <span>
+      Equipe de Corrida de Servidores de GTARP
+    </span>
+
+  </div>
+
+</footer>
+
+<!-- TRANSITION -->
+
+<div class="page-transition"></div>
+
+<script src="script.js"></script>
+
+<script type="module"
+        src="js/navbar-auth.js"></script>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  doc,
+  getDoc
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app =
+initializeApp(firebaseConfig);
+
+const db =
+getFirestore(app);
+
+let inscricoesAbertas = false;
+
+/* STATUS */
+
+async function carregarStatus(){
+
+  const status =
+  document.getElementById("statusInscricao");
+
+  const formCard =
+  document.querySelector(".form-card");
+
+  try{
+
+    const configRef =
+    doc(db, "sistema", "config");
+
+    const configSnap =
+    await getDoc(configRef);
+
+    if(!configSnap.exists()){
+
+      status.className =
+      "status-inscricao status-closed";
+
+      status.innerHTML =
+      "INSCRIÇÕES FECHADAS";
+
+      formCard.style.display = "none";
+
+      return;
+
+    }
+
+    const sistema =
+    configSnap.data();
+
+    inscricoesAbertas =
+    sistema.inscricoesAbertas === true;
+
+    if(inscricoesAbertas){
+
+      status.className =
+      "status-inscricao status-open";
+
+      status.innerHTML =
+      "INSCRIÇÕES ABERTAS";
+
+      formCard.style.opacity = "1";
+
+      formCard.style.pointerEvents = "all";
+
+    }else{
+
+      status.className =
+      "status-inscricao status-closed";
+
+      status.innerHTML =
+      "INSCRIÇÕES FECHADAS";
+
+      formCard.style.display = "none";
+
+    }
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+/* SUBMIT */
+
+document
+.getElementById("submitBtn")
+.addEventListener("click", async () => {
+
+    if(!inscricoesAbertas){
+
+    alert("As inscrições estão fechadas.");
+
+    return;
+
+  }
+
+  const tabletNome =
+  document.getElementById("tabletNome").value;
+
+  const carro =
+  document.getElementById("carro").value;
+
+  if(!tabletNome || !carro){
+
+    alert("Preencha todos os campos.");
+
+    return;
+
+  }
+
+  try{
+
+    await addDoc(
+
+      collection(db, "inscricoes"),
+
+      {
+
+        tabletNome: tabletNome,
+
+        carro: carro,
+
+        status: "pendente",
+
+        criadoEm: Date.now()
+
+      }
+
+    );
+
+    alert("Inscrição enviada!");
+
+    document.getElementById("tabletNome").value = "";
+    document.getElementById("carro").value = "";
+
+  }catch(error){
+
+    alert(error.message);
+
+  }
+
+});
+
+carregarStatus();
+
+</script>
+
+</body>
+</html>

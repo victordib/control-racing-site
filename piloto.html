@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Control Racing</title>
+
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <link rel="stylesheet" href="../css/style-piloto.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+
+<nav class="navbar">
+
+  <!-- LOGO -->
+  <div class="logo">
+
+    <img src="https://a.imagem.app/GYxzpt.png" alt="Control Racing">
+
+  </div>
+
+  <!-- MENU -->
+  <ul class="nav-links">
+
+    <li><a href="index.html">Home</a></li>
+
+    <li><a href="equipe.html">Equipe</a></li>
+
+    <li><a href="blacklist.html">Blacklist</a></li>
+
+    <li><a href="hall.html">Hall da Fama</a></li>
+
+    <li><a href="sobre.html">Sobre</a></li>
+
+    <li><a href="memorial.html">Memorial</a></li>
+
+    <li>
+      <a id="auth-link">
+        LOGIN
+      </a>
+    </li>
+
+  </ul>
+
+</nav>
+  <section class="hero">
+
+<div class="pilot-page">
+
+  <!-- IMAGEM -->
+  <img src=""
+     class="bg-car"
+     id="bg-car">
+
+  <!-- OVERLAY -->
+  <div class="overlay"></div>
+
+  <!-- Blacklist -->
+  <div class="pilot-info">
+
+    <div class="rank"
+      id="pilot-rank">
+    </div>
+
+    <h1 class="glitch"
+      id="pilot-name">
+    </h1>
+
+    <div class="car-name"
+      id="pilot-car">
+    </div>
+
+    <!-- MELHORES PISTAS -->
+
+    <div class="best-tracks"
+        id="best-tracks">
+
+      <div class="track-pill"
+          id="track1">
+      </div>
+
+      <div class="track-pill"
+          id="track2">
+      </div>
+
+      <div class="track-pill"
+          id="track3">
+      </div>
+
+    </div>
+
+    <!-- ESTATISTICAS -->
+
+    <div class="pilot-stats"
+     id="pilot-stats"
+     style="display:none;">
+
+      <div class="stat-box">
+
+        <span>PONTOS</span>
+
+        <strong id="total-pontos">
+          0
+        </strong>
+
+      </div>
+
+      <div class="stat-box">
+
+        <span>VITORIAS</span>
+
+        <strong id="total-vitorias">
+          0
+        </strong>
+
+      </div>
+
+      <div class="stat-box">
+
+        <span>PODIOS</span>
+
+        <strong id="total-podios">
+          0
+        </strong>
+
+      </div>
+
+    </div>
+
+    <!-- HISTORICO -->
+
+    <div class="race-history"
+     id="race-history"
+     style="display:none;">
+
+      <h3>
+        HISTORICO DE CORRIDAS
+      </h3>
+
+      <div id="history-container">
+
+      </div>
+
+    </div>
+    <a href="#"
+      class="back-button"
+      id="back-button">
+
+      VOLTAR
+
+    </a>
+
+  </div>
+
+</div>
+
+  </section>
+
+
+  <!-- FOOTER -->
+
+<footer class="footer">
+
+  <div class="footer-line"></div>
+
+  <div class="footer-content">
+
+    <p>
+      © 2026 CONTROL RACING — Todos os direitos reservados
+    </p>
+
+    <span>
+      Equipe de Corrida de Servidores de GTARP
+    </span>
+
+  </div>
+
+</footer>
+
+<!-- TRANSITION -->
+
+<div class="page-transition"></div>
+<script src="script.js"></script>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  getDocs
+
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+
+  authDomain: "control-racing.firebaseapp.com",
+
+  projectId: "control-racing",
+
+  storageBucket: "control-racing.firebasestorage.app",
+
+  messagingSenderId: "114488486568",
+
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+/* UID URL */
+
+const params =
+new URLSearchParams(window.location.search);
+
+const uid =
+params.get("uid");
+
+const mode =
+params.get("mode");
+
+const backButton =
+document.getElementById("back-button");
+
+if(mode === "driver"){
+
+  backButton.href =
+  "equipe.html";
+
+}else{
+
+  backButton.href =
+  "blacklist.html";
+
+}
+
+backButton.addEventListener("click", (e) => {
+
+  e.preventDefault();
+
+  const transition =
+  document.querySelector(".page-transition");
+
+  transition.classList.add("active");
+
+  setTimeout(() => {
+
+    window.location.href =
+    backButton.href;
+
+  }, 450);
+
+});
+
+/* LOAD PILOT */
+
+async function loadPilot(){
+
+  if(!uid){
+
+    window.location.href =
+    "../blacklist.html";
+
+    return;
+
+  }
+
+  const docRef =
+  doc(db, "usuarios", uid);
+
+  const docSnap =
+  await getDoc(docRef);
+
+  if(docSnap.exists()){
+
+    const data =
+    docSnap.data();
+
+    /* FOTO CARRO */
+
+    document
+    .getElementById("bg-car")
+    .src = data.fotoCarro;
+
+    /* RANK */
+
+    document
+    .getElementById("pilot-rank")
+    .innerText = "#" + data.rank;
+
+    /* NOME */
+
+    const pilotName =
+    document.getElementById("pilot-name");
+
+    pilotName.innerText =
+    data.nome;
+
+    pilotName.setAttribute(
+      "data-text",
+      data.nome
+    );
+
+    /* CARRO */
+
+    document
+    .getElementById("pilot-car")
+    .innerText = data.carro;
+
+    /* MELHORES PISTAS */
+
+    document
+    .getElementById("track1")
+    .innerText =
+    data.pista1 || "SEM PISTA";
+
+    document
+    .getElementById("track2")
+    .innerText =
+    data.pista2 || "SEM PISTA";
+
+    document
+    .getElementById("track3")
+    .innerText =
+    data.pista3 || "SEM PISTA";
+
+/* ========================= */
+/* DRIVER MODE */
+/* ========================= */
+
+    if(mode === "driver"){
+
+      document
+      .getElementById("pilot-stats")
+      .style.display = "flex";
+
+      document
+      .getElementById("race-history")
+      .style.display = "block";
+
+      let totalPontos = 0;
+
+      let vitorias = 0;
+
+      let podios = 0;
+
+      const historyContainer =
+      document.getElementById("history-container");
+
+      const corridasSnap =
+      await getDocs(collection(db, "corridas"));
+
+      corridasSnap.forEach((corridaDoc) => {
+
+        const corrida =
+        corridaDoc.data();
+
+        const resultados =
+        corrida.resultados || [];
+
+        resultados.forEach((r) => {
+
+          if(r.uid === uid){
+
+            totalPontos += r.pontos;
+
+            if(r.posicao === 1){
+
+              vitorias++;
+
+            }
+
+            if(r.posicao <= 3){
+
+              podios++;
+
+            }
+
+            const item =
+            document.createElement("div");
+
+            item.classList.add("history-item");
+
+            item.innerHTML = `
+
+              <strong>
+                ${corrida.nome}
+              </strong>
+
+              <span>
+                Posição: #${r.posicao}
+                • ${r.pontos} PTS
+              </span>
+
+            `;
+
+            historyContainer.appendChild(item);
+
+          }
+
+        });
+
+      });
+
+      document
+      .getElementById("total-pontos")
+      .innerText = totalPontos;
+
+      document
+      .getElementById("total-vitorias")
+      .innerText = vitorias;
+
+      document
+      .getElementById("total-podios")
+      .innerText = podios;
+
+    }
+  }
+
+}
+
+loadPilot();
+
+</script>
+<script type="module" src="js/navbar-auth.js"></script>
+</body>
+</html>
