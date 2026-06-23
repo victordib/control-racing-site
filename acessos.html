@@ -4,23 +4,74 @@
   <meta charset="UTF-8">
   <title>Control Racing - Acessos</title>
   <link rel="stylesheet" href="css/style.css">
+
+  <style>
+  body {
+    min-height: 100vh;
+    background: #050505;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    padding: 40px;
+  }
+
+  .acessos-card {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(5, 5, 5, 0.9);
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 18px;
+    padding: 30px;
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.12);
+  }
+
+  h1 {
+    color: #00E5FF;
+    margin-bottom: 25px;
+    letter-spacing: 2px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+  }
+
+  th, td {
+    padding: 14px;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.18);
+    text-align: left;
+    font-size: 13px;
+  }
+
+  th {
+    color: #00E5FF;
+  }
+
+  .empty {
+    color: #aaa;
+    padding: 20px;
+  }
+</style>
 </head>
 
 <body>
 
-  <h1>REGISTRO DE ACESSOS</h1>
+  <div class="acessos-card">
 
-  <table>
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Nome</th>
-        <th>Email</th>
-        <th>Navegador</th>
-      </tr>
-    </thead>
-    <tbody id="listaAcessos"></tbody>
-  </table>
+    <h1>REGISTRO DE ACESSOS</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Navegador</th>
+        </tr>
+      </thead>
+      <tbody id="listaAcessos"></tbody>
+    </table>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -88,6 +139,17 @@
       const snap = await getDocs(q);
 
       lista.innerHTML = "";
+
+      if (snap.empty) {
+        lista.innerHTML = `
+          <tr>
+            <td colspan="4" class="empty">
+              Nenhum acesso registrado.
+            </td>
+          </tr>
+        `;
+        return;
+      }
 
       snap.forEach((doc) => {
         const acesso = doc.data();
