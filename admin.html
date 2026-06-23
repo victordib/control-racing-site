@@ -34,7 +34,7 @@
 
 <!-- ADMIN -->
 
-<section class="admin-wrapper">
+<section class="admin-wrapper" id="adminContent" style="display:none;">
 
   <div class="admin-card">
 
@@ -230,49 +230,44 @@ const db = getFirestore(app);
 
 onAuthStateChanged(auth, async (user) => {
 
-  if(user){
-
-    /* USER DOC */
-
-    const userRef =
-    doc(db, "usuarios", user.uid);
-
-    const userSnap =
-    await getDoc(userRef);
-
-    if(!userSnap.exists()){
-
-      window.location.href = "painel.html";
-
-      return;
-
-    }
-
-    const userData = userSnap.data();
-
-    /* ADMIN CHECK */
-
-    if(userData.admin !== true){
-
-      window.location.href = "painel.html";
-
-      return;
-
-    }
-
-    /* LOAD USERS */
-
-    loadUsers();
-
-    loadPedidos();
-
-    loadInscricoes();
-
-  }else{
-
+  if(!user){
     window.location.href = "login.html";
-
+    return;
   }
+
+  const userRef = doc(db, "usuarios", user.uid);
+  const userSnap = await getDoc(userRef);
+
+  if(!userSnap.exists()){
+    window.location.href = "painel.html";
+    return;
+  }
+
+  const userData = userSnap.data();
+
+  const autorizado =
+    (
+      userData.equipe === "Founder" &&
+      userData.ordem === 1
+    )
+    ||
+    (
+      userData.equipe === "Manager" &&
+      userData.ordem === 2
+    );
+
+  if(!autorizado){
+    window.location.href = "painel.html";
+    return;
+  }
+
+  document.getElementById("adminContent").style.display = "block";
+
+  loadUsers();
+  loadPedidos();
+  loadInscricoes();
+  carregarPilotos();
+  carregarStatusInscricoes();
 
 });
 
@@ -923,10 +918,6 @@ window.deletarPedido = async (pedidoId) => {
 
 };
 
-/* INIT */
-
-carregarPilotos();
-
 /* FADEOUT VOLTAR */
 
 document
@@ -1007,8 +998,6 @@ toggleBtn.addEventListener(
 
   }
 );
-
-carregarStatusInscricoes();
 
 /* ========================= */
 /* RESET COLETAS */
