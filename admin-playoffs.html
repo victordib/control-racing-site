@@ -21,7 +21,7 @@
 <body>
 
 <!-- BG -->
-<div id="caixaContent" style="display:none;">
+<div id="adminPlayoffsContent" style="display:none;">
 <div class="bg-image">
 
   <img src="https://a.imagem.app/GYziVJ.png">
@@ -293,13 +293,11 @@ const selects = [
 
 ];
 
-/* VERIFICAR LOGIN */
+/* VERIFICAR LOGIN E PERMISSÃO */
 
 onAuthStateChanged(auth, async (user) => {
 
   if(!user){
-
-    alert("Você precisa estar logado.");
 
     window.location.href = "login.html";
 
@@ -307,7 +305,43 @@ onAuthStateChanged(auth, async (user) => {
 
   }
 
-  document.getElementById("caixaContent").style.display = "block";
+  const userRef =
+  doc(db, "usuarios", user.uid);
+
+  const userSnap =
+  await getDoc(userRef);
+
+  if(!userSnap.exists()){
+
+    window.location.href = "painel.html";
+
+    return;
+
+  }
+
+  const data =
+  userSnap.data();
+
+  const permitido =
+    (
+      data.equipe === "Founder" &&
+      data.ordem === 1
+    )
+    ||
+    (
+      data.equipe === "Manager" &&
+      data.ordem === 2
+    );
+
+  if(!permitido){
+
+    window.location.href = "painel.html";
+
+    return;
+
+  }
+
+  document.getElementById("adminPlayoffsContent").style.display = "block";
 
   await loadPilotos();
 
