@@ -21,7 +21,7 @@
 <body>
 
 <!-- BG -->
-
+<div id="caixaContent" style="display:none;">
 <div class="bg-image">
 
   <img src="https://a.imagem.app/GYziVJ.png">
@@ -221,7 +221,7 @@
   </div>
 
 </section>
-
+</div>
 <!-- TRANSITION -->
 
 <div class="page-transition"></div>
@@ -306,6 +306,8 @@ onAuthStateChanged(auth, async (user) => {
     return;
 
   }
+
+  document.getElementById("caixaContent").style.display = "block";
 
   await loadPilotos();
 

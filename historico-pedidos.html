@@ -22,7 +22,7 @@
 </head>
 
 <body>
-
+<div id="caixaContent" style="display:none;">
 <nav class="navbar">
 
   <div class="logo">
@@ -103,6 +103,7 @@
   </div>
 
 </section>
+</div>
 
 <div class="page-transition"></div>
 
@@ -214,6 +215,8 @@ onAuthStateChanged(auth, async(user) => {
     return;
 
   }
+
+  document.getElementById("caixaContent").style.display = "block";
 
   carregarHistorico();
 
