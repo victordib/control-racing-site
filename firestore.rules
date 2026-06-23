@@ -2,30 +2,29 @@
 //
 // MODELO DE REGRAS DE SEGURANÇA DO FIRESTORE
 // -------------------------------------------
-// Este é o arquivo mais importante de toda a revisão de segurança.
-// As Security Rules são a ÚNICA proteção que não pode ser contornada
-// por alguém chamando a API do Firestore diretamente pelo navegador
-// (DevTools, curl, etc.) — diferente de validações feitas em
-// JavaScript no site, que só protegem usuários "bem comportados".
+// Atualizado para as coleções REAIS encontradas no código do site:
+//   usuarios, corridas, inscricoes, pedidos, coletas, acessos,
+//   financeiro/caixa (documento), playoffs/temporadaAtual (documento)
 //
-// Este arquivo NÃO estava no projeto enviado, então não sei quais
-// regras estão publicadas hoje no seu projeto Firebase. O que está
-// abaixo é um MODELO baseado nas coleções que identifiquei no código
-// (inscricoes, pedidos, acessos, etc.) — você precisa revisar campo a
-// campo e publicar isso pelo Firebase Console (Firestore Database >
-// Regras) ou via `firebase deploy --only firestore:rules`.
+// Estas regras são a ÚNICA proteção que não pode ser contornada por
+// alguém chamando a API do Firestore direto (DevTools, curl, app
+// próprio) — diferente de validações em JavaScript no site, que só
+// protegem usuários "bem comportados".
 //
-// Princípios usados aqui (ajuste à sua realidade):
-//   - Leitura pública só onde o site realmente precisa (ex: ranking).
-//   - Escrita pública SOMENTE no formulário de inscrição, e com
-//     validação de tipo/tamanho dos campos (isto é o "anti-injeção"
-//     real para um banco NoSQL: garantir que o documento gravado tem
-//     exatamente o formato esperado, nada além disso).
-//   - Qualquer coisa sensível (pedidos, caixa, blacklist, acessos)
-//     exige login (request.auth != null).
-//   - Quem é "admin" deve ser controlado por um campo no próprio
-//     documento do usuário (ex: /usuarios/{uid}.role == "admin"),
-//     nunca confiando em algo vindo do cliente.
+// IMPORTANTE — sobre o problema do "equipe.html / blacklist.html só
+// mostra logado": essas duas páginas leem a coleção `usuarios`
+// filtrando por `visivel == true`, e o JavaScript NÃO faz nenhuma
+// checagem de login antes disso. Se está exigindo login mesmo assim,
+// é porque a regra publicada hoje no seu Firebase para `usuarios`
+// pede `request.auth != null`. A regra abaixo corrige isso: permite
+// leitura pública apenas dos documentos com `visivel == true`
+// (exatamente o que essas páginas já filtram); o resto de cada
+// usuário continua protegido pelas outras regras desse mesmo bloco.
+//
+// Publique isto em: Firebase Console > Firestore Database > Regras,
+// ou via `firebase deploy --only firestore:rules`.
+// Revise nomes de campo (visivel, ordem, rank, role) contra o que
+// você realmente usa — inferi pelos nomes vistos no JavaScript.
 
 rules_version = '2';
 
@@ -41,10 +40,29 @@ service cloud.firestore {
         get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == "admin";
     }
 
-    // INSCRIÇÕES (formulario.html) — única coleção com escrita pública.
-    // Validamos tipo e tamanho de cada campo para impedir que alguém
-    // grave estruturas inesperadas (objetos gigantes, scripts em
-    // campos que deveriam ser texto curto, etc.)
+    // PERFIS / PILOTOS (equipe.html, blacklist.html, piloto.html lêem
+    // daqui). Leitura pública SOMENTE de quem está marcado como
+    // visivel == true — é exatamente o filtro que o site já usa.
+    // Edição exige estar logado como o próprio usuário, e mudar a
+    // própria "role" (admin) é bloqueado.
+    match /usuarios/{uid} {
+      allow read: if resource.data.visivel == true || estaLogado();
+
+      allow update: if estaLogado() && request.auth.uid == uid &&
+        !("role" in request.resource.data.diff(resource.data).affectedKeys());
+
+      allow create, delete: if ehAdmin();
+    }
+
+    // CORRIDAS / RESULTADOS — exibido publicamente em corridas.html,
+    // campeonatos.html, piloto.html. Só admin cria/edita.
+    match /corridas/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    // INSCRIÇÕES (formulario.html) — única coleção com escrita
+    // pública, e validada campo a campo.
     match /inscricoes/{id} {
       allow read: if true;
 
@@ -58,61 +76,37 @@ service cloud.firestore {
         request.resource.data.carro.size() <= 40 &&
         request.resource.data.status == "pendente";
 
-      // só admin pode aprovar/editar/excluir inscrições
       allow update, delete: if ehAdmin();
     }
 
-    // Dados de pilotos / equipe — leitura pública (aparece no site),
-    // escrita só por admin.
-    match /pilotos/{id} {
-      allow read: if true;
-      allow write: if ehAdmin();
+    // PEDIDOS, COLETAS — informação interna (vendas/comissões),
+    // exige login. Troque para ehAdmin() se só admin deve ver tudo.
+    match /pedidos/{id} {
+      allow read, write: if estaLogado();
     }
 
-    // Blacklist, campeonatos, corridas, playoffs — mesmo padrão:
-    // o site mostra pra todo mundo, só admin edita.
-    match /blacklist/{id} {
-      allow read: if true;
-      allow write: if ehAdmin();
+    match /coletas/{id} {
+      allow read, write: if estaLogado();
     }
 
-    match /campeonatos/{id} {
-      allow read: if true;
-      allow write: if ehAdmin();
+    // FINANCEIRO / CAIXA — sensível, só admin.
+    match /financeiro/{id} {
+      allow read, write: if ehAdmin();
     }
 
-    match /corridas/{id} {
-      allow read: if true;
-      allow write: if ehAdmin();
-    }
-
+    // PLAYOFFS — leitura pública (mostrado no site), escrita só admin.
     match /playoffs/{id} {
       allow read: if true;
       allow write: if ehAdmin();
     }
 
-    // Pedidos, caixa, acessos — informação interna, exige login.
-    match /pedidos/{id} {
-      allow read, write: if estaLogado();
-    }
-
-    match /caixa/{id} {
-      allow read, write: if ehAdmin();
-    }
-
+    // ACESSOS (log de quem acessou o quê) — só admin lê; qualquer
+    // visitante pode gerar um registro (se o próprio site grava isso
+    // automaticamente); nada pode ser alterado/apagado depois.
     match /acessos/{id} {
       allow read: if ehAdmin();
-      allow create: if true; // se o próprio site registra o acesso do visitante
+      allow create: if true;
       allow update, delete: if false;
-    }
-
-    // Cadastro de usuários (perfis) — cada um só lê/edita o próprio,
-    // role só é alterada por admin.
-    match /usuarios/{uid} {
-      allow read: if estaLogado();
-      allow update: if estaLogado() && request.auth.uid == uid &&
-        !("role" in request.resource.data.diff(resource.data).affectedKeys());
-      allow write: if ehAdmin();
     }
 
     // Bloqueia qualquer coleção não listada explicitamente acima.

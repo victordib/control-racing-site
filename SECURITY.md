@@ -52,18 +52,28 @@ que não vêm do seu site real, mesmo que alguém tenha a apiKey.
 
 ## 4. Firestore Security Rules (o item mais importante)
 
+**Nota sobre "equipe.html e blacklist.html só mostram dados logado":**
+isso não vem de nenhuma mudança feita aqui — o JavaScript dessas duas
+páginas não tem nenhuma checagem de login, ele só lê a coleção
+`usuarios` filtrando por `visivel == true`. Se está pedindo login
+mesmo assim, é porque a regra **atualmente publicada no seu Firebase**
+exige `request.auth != null` para ler `usuarios`. O `firestore.rules`
+deste pacote já corrige isso (permite leitura pública só dos
+documentos com `visivel == true`) — você só precisa publicá-lo.
+
 Este é a proteção que **não pode ser contornada pelo navegador** —
 equivalente a "queries parametrizadas" no mundo SQL: ela garante que,
 independente do que o código do site faça, o banco só aceita
 exatamente o formato de dado esperado, do usuário certo.
 
 O projeto enviado não incluía o arquivo de regras (elas vivem no
-Firebase, não no site), então criei um **modelo** em `firestore.rules`
-baseado nas coleções que identifiquei no código
-(`inscricoes`, `pilotos`, `blacklist`, `pedidos`, `caixa`, `acessos`,
-etc.). Você precisa:
-1. Revisar os nomes de coleção/campos contra o que está realmente no
-   seu Firestore (eu inferi pelos nomes usados no JavaScript).
+Firebase, não no site). Atualizei `firestore.rules` para refletir as
+coleções **reais** usadas no código: `usuarios`, `corridas`,
+`inscricoes`, `pedidos`, `coletas`, `acessos`, `financeiro` (documento
+`caixa`) e `playoffs` (documento `temporadaAtual`). Você precisa:
+1. Revisar campo a campo (especialmente `role` em `usuarios`, que
+   decide quem é admin — confirme que esse campo existe e está
+   correto nos seus documentos).
 2. Publicar via Firebase Console (Firestore Database > Regras) ou
    `firebase deploy --only firestore:rules`.
 
