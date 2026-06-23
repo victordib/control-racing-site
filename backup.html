@@ -19,7 +19,7 @@
     }
 
     .backup-card {
-      max-width: 700px;
+      max-width: 800px;
       width: 100%;
       background: rgba(5, 5, 5, 0.92);
       border: 1px solid rgba(0, 229, 255, 0.4);
@@ -32,6 +32,12 @@
     h1 {
       color: #00E5FF;
       margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #00E5FF;
+      margin-top: 35px;
+      font-size: 18px;
     }
 
     p {
@@ -57,10 +63,27 @@
       border: 1px solid #00E5FF;
     }
 
+    .danger-btn {
+      background: #ff3b3b;
+      color: #fff;
+    }
+
+    input[type="file"] {
+      margin: 15px 0;
+      color: #fff;
+    }
+
     #status {
       margin-top: 20px;
       color: #aaa;
       font-size: 14px;
+      white-space: pre-line;
+    }
+
+    .warning {
+      color: #ffb347;
+      font-size: 13px;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -74,12 +97,30 @@
     <h1>BACKUP FIREBASE</h1>
 
     <p>
-      Gere um backup em JSON das principais coleções do banco de dados da Control Racing.
+      Exporte ou restaure os dados principais do banco da Control Racing.
     </p>
+
+    <h2>EXPORTAR BACKUP</h2>
 
     <button id="backupBtn">
       GERAR BACKUP JSON
     </button>
+
+    <h2>IMPORTAR BACKUP</h2>
+
+    <p class="warning">
+      Atenção: a restauração pode sobrescrever documentos existentes com os dados do arquivo JSON.
+    </p>
+
+    <input type="file" id="restoreFile" accept=".json">
+
+    <br>
+
+    <button id="restoreBtn" class="danger-btn">
+      RESTAURAR BACKUP JSON
+    </button>
+
+    <br>
 
     <button class="back-btn" onclick="window.location.href='admin.html'">
       VOLTAR
@@ -105,6 +146,7 @@ import {
   getFirestore,
   doc,
   getDoc,
+  setDoc,
   collection,
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -123,6 +165,9 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const statusBox = document.getElementById("status");
+const backupBtn = document.getElementById("backupBtn");
+const restoreBtn = document.getElementById("restoreBtn");
+const restoreFile = document.getElementById("restoreFile");
 
 let permitidoAdmin = false;
 
@@ -178,7 +223,11 @@ async function exportarColecao(nomeColecao) {
   return dados;
 }
 
-document.getElementById("backupBtn").addEventListener("click", async () => {
+/* ========================= */
+/* EXPORTAR BACKUP */
+/* ========================= */
+
+backupBtn.addEventListener("click", async () => {
 
   if (!permitidoAdmin) {
     alert("Acesso negado.");
@@ -193,6 +242,7 @@ document.getElementById("backupBtn").addEventListener("click", async () => {
     const backup = {
       geradoEm: new Date().toLocaleString("pt-BR"),
       projeto: "Control Racing",
+      versao: 2,
       colecoes: {
         usuarios: await exportarColecao("usuarios"),
         pedidos: await exportarColecao("pedidos"),
@@ -240,6 +290,148 @@ document.getElementById("backupBtn").addEventListener("click", async () => {
     statusBox.innerText = "Erro ao gerar backup.";
 
     alert("Erro ao gerar backup: " + error.message);
+
+  }
+
+});
+
+/* ========================= */
+/* IMPORTAR BACKUP */
+/* ========================= */
+
+function lerArquivoJSON(file) {
+  return new Promise((resolve, reject) => {
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      try {
+        const json = JSON.parse(reader.result);
+        resolve(json);
+      } catch (error) {
+        reject(new Error("Arquivo JSON inválido."));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Erro ao ler o arquivo."));
+    };
+
+    reader.readAsText(file);
+
+  });
+}
+
+async function restaurarColecao(nomeColecao, documentos) {
+
+  let total = 0;
+
+  for (const docId in documentos) {
+
+    if (!Object.prototype.hasOwnProperty.call(documentos, docId)) {
+      continue;
+    }
+
+    const dados = documentos[docId];
+
+    await setDoc(
+      doc(db, nomeColecao, docId),
+      dados,
+      { merge: true }
+    );
+
+    total++;
+
+  }
+
+  return total;
+}
+
+restoreBtn.addEventListener("click", async () => {
+
+  if (!permitidoAdmin) {
+    alert("Acesso negado.");
+    window.location.href = "painel.html";
+    return;
+  }
+
+  const file = restoreFile.files[0];
+
+  if (!file) {
+    alert("Selecione um arquivo JSON de backup.");
+    return;
+  }
+
+  const confirmar1 = confirm(
+    "Tem certeza que deseja restaurar este backup? Documentos existentes podem ser sobrescritos."
+  );
+
+  if (!confirmar1) return;
+
+  const confirmar2 = confirm(
+    "Confirma novamente? Essa ação deve ser feita apenas se você tiver certeza."
+  );
+
+  if (!confirmar2) return;
+
+  try {
+
+    statusBox.innerText = "Lendo arquivo de backup...";
+
+    const backup = await lerArquivoJSON(file);
+
+    if (!backup.colecoes) {
+      alert("Backup inválido: objeto 'colecoes' não encontrado.");
+      return;
+    }
+
+    const colecoesPermitidas = [
+      "usuarios",
+      "pedidos",
+      "financeiro",
+      "coletas",
+      "playoffs",
+      "acessos",
+      "sistema",
+      "inscricoes",
+      "corridas"
+    ];
+
+    let relatorio = "Iniciando restauração...\n";
+
+    for (const nomeColecao of colecoesPermitidas) {
+
+      if (!backup.colecoes[nomeColecao]) {
+        relatorio += `\n${nomeColecao}: ignorada, não existe no backup.`;
+        statusBox.innerText = relatorio;
+        continue;
+      }
+
+      relatorio += `\nRestaurando ${nomeColecao}...`;
+      statusBox.innerText = relatorio;
+
+      const total = await restaurarColecao(
+        nomeColecao,
+        backup.colecoes[nomeColecao]
+      );
+
+      relatorio += ` concluído (${total} documentos).`;
+      statusBox.innerText = relatorio;
+
+    }
+
+    relatorio += "\n\nRestauração concluída com sucesso.";
+    statusBox.innerText = relatorio;
+
+    alert("Backup restaurado com sucesso!");
+
+  } catch (error) {
+
+    console.error(error);
+
+    statusBox.innerText = "Erro ao restaurar backup.";
+
+    alert("Erro ao restaurar backup: " + error.message);
 
   }
 
