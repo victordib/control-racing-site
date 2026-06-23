@@ -104,10 +104,14 @@
 <div class="page-transition"></div>
 <script src="script.js"></script>
 
+<script src="js/security-utils.js"></script>
+
 <script type="module">
 
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { firebaseConfig } from "./js/firebase-config.js";
 
 import {
 
@@ -122,22 +126,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* FIREBASE */
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
-
-  authDomain: "control-racing.firebaseapp.com",
-
-  projectId: "control-racing",
-
-  storageBucket: "control-racing.firebasestorage.app",
-
-  messagingSenderId: "114488486568",
-
-  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
-
-};
 
 const app = initializeApp(firebaseConfig);
 
@@ -186,16 +174,16 @@ async function loadBlacklist(){
               #${data.rank}
             </div>
 
-            <img src="${data.fotoBlacklist}">
+            <img src="${escapeHTML(data.fotoBlacklist)}">
 
             <div class="overlay"></div>
 
             <div class="content">
 
-                <h2>${data.nome}</h2>
+                <h2>${escapeHTML(data.nome)}</h2>
 
               <div class="car">
-                ${data.carro}
+                ${escapeHTML(data.carro)}
               </div>
 
             </div>
@@ -226,16 +214,16 @@ async function loadBlacklist(){
             #${data.rank}
           </div>
 
-          <img src="${data.fotoBlacklist}">
+          <img src="${escapeHTML(data.fotoBlacklist)}">
 
           <div class="overlay"></div>
 
           <div class="content">
 
-              <h2>${data.nome}</h2>
+              <h2>${escapeHTML(data.nome)}</h2>
 
             <div class="car">
-              ${data.carro}
+              ${escapeHTML(data.carro)}
             </div>
 
           </div>

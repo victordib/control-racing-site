@@ -1,17 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
+import { firebaseConfig } from "./firebase-config.js";
+
 import {
   getAuth,
   signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
-  authDomain: "control-racing.firebaseapp.com",
-  projectId: "control-racing",
-
-};
 
 const app = initializeApp(firebaseConfig);
 

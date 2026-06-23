@@ -1,0 +1,123 @@
+// firestore.rules
+//
+// MODELO DE REGRAS DE SEGURANÇA DO FIRESTORE
+// -------------------------------------------
+// Este é o arquivo mais importante de toda a revisão de segurança.
+// As Security Rules são a ÚNICA proteção que não pode ser contornada
+// por alguém chamando a API do Firestore diretamente pelo navegador
+// (DevTools, curl, etc.) — diferente de validações feitas em
+// JavaScript no site, que só protegem usuários "bem comportados".
+//
+// Este arquivo NÃO estava no projeto enviado, então não sei quais
+// regras estão publicadas hoje no seu projeto Firebase. O que está
+// abaixo é um MODELO baseado nas coleções que identifiquei no código
+// (inscricoes, pedidos, acessos, etc.) — você precisa revisar campo a
+// campo e publicar isso pelo Firebase Console (Firestore Database >
+// Regras) ou via `firebase deploy --only firestore:rules`.
+//
+// Princípios usados aqui (ajuste à sua realidade):
+//   - Leitura pública só onde o site realmente precisa (ex: ranking).
+//   - Escrita pública SOMENTE no formulário de inscrição, e com
+//     validação de tipo/tamanho dos campos (isto é o "anti-injeção"
+//     real para um banco NoSQL: garantir que o documento gravado tem
+//     exatamente o formato esperado, nada além disso).
+//   - Qualquer coisa sensível (pedidos, caixa, blacklist, acessos)
+//     exige login (request.auth != null).
+//   - Quem é "admin" deve ser controlado por um campo no próprio
+//     documento do usuário (ex: /usuarios/{uid}.role == "admin"),
+//     nunca confiando em algo vindo do cliente.
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function estaLogado() {
+      return request.auth != null;
+    }
+
+    function ehAdmin() {
+      return estaLogado() &&
+        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == "admin";
+    }
+
+    // INSCRIÇÕES (formulario.html) — única coleção com escrita pública.
+    // Validamos tipo e tamanho de cada campo para impedir que alguém
+    // grave estruturas inesperadas (objetos gigantes, scripts em
+    // campos que deveriam ser texto curto, etc.)
+    match /inscricoes/{id} {
+      allow read: if true;
+
+      allow create: if
+        request.resource.data.keys().hasOnly(["tabletNome", "carro", "status", "criadoEm"]) &&
+        request.resource.data.tabletNome is string &&
+        request.resource.data.tabletNome.size() > 0 &&
+        request.resource.data.tabletNome.size() <= 40 &&
+        request.resource.data.carro is string &&
+        request.resource.data.carro.size() > 0 &&
+        request.resource.data.carro.size() <= 40 &&
+        request.resource.data.status == "pendente";
+
+      // só admin pode aprovar/editar/excluir inscrições
+      allow update, delete: if ehAdmin();
+    }
+
+    // Dados de pilotos / equipe — leitura pública (aparece no site),
+    // escrita só por admin.
+    match /pilotos/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    // Blacklist, campeonatos, corridas, playoffs — mesmo padrão:
+    // o site mostra pra todo mundo, só admin edita.
+    match /blacklist/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    match /campeonatos/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    match /corridas/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    match /playoffs/{id} {
+      allow read: if true;
+      allow write: if ehAdmin();
+    }
+
+    // Pedidos, caixa, acessos — informação interna, exige login.
+    match /pedidos/{id} {
+      allow read, write: if estaLogado();
+    }
+
+    match /caixa/{id} {
+      allow read, write: if ehAdmin();
+    }
+
+    match /acessos/{id} {
+      allow read: if ehAdmin();
+      allow create: if true; // se o próprio site registra o acesso do visitante
+      allow update, delete: if false;
+    }
+
+    // Cadastro de usuários (perfis) — cada um só lê/edita o próprio,
+    // role só é alterada por admin.
+    match /usuarios/{uid} {
+      allow read: if estaLogado();
+      allow update: if estaLogado() && request.auth.uid == uid &&
+        !("role" in request.resource.data.diff(resource.data).affectedKeys());
+      allow write: if ehAdmin();
+    }
+
+    // Bloqueia qualquer coleção não listada explicitamente acima.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

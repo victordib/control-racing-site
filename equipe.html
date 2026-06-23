@@ -96,10 +96,14 @@
 <div class="page-transition"></div>
 <script src="script.js"></script>
 
+<script src="js/security-utils.js"></script>
+
 <script type="module">
 
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { firebaseConfig } from "./js/firebase-config.js";
 
 import {
 
@@ -113,22 +117,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* FIREBASE */
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
-
-  authDomain: "control-racing.firebaseapp.com",
-
-  projectId: "control-racing",
-
-  storageBucket: "control-racing.firebasestorage.app",
-
-  messagingSenderId: "114488486568",
-
-  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
-
-};
 
 const app = initializeApp(firebaseConfig);
 
@@ -172,12 +160,12 @@ async function loadMembers(){
 
       <div class="glow"></div>
 
-      <img src="${data.foto}"
-           alt="${data.nome}">
+      <img src="${escapeHTML(data.foto)}"
+           alt="${escapeHTML(data.nome)}">
 
-      <h3>${data.nome}</h3>
+      <h3>${escapeHTML(data.nome)}</h3>
 
-      <p>${data.equipe}</p>
+      <p>${escapeHTML(data.equipe)}</p>
 
     `;
 

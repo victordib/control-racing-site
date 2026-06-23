@@ -179,10 +179,14 @@
 
 <!-- FIREBASE -->
 <script src="script.js"></script>
+<script src="js/security-utils.js"></script>
+
 <script type="module">
 
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { firebaseConfig } from "./js/firebase-config.js";
 
 import {
 
@@ -210,22 +214,6 @@ import {
 
 
 /* FIREBASE */
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
-
-  authDomain: "control-racing.firebaseapp.com",
-
-  projectId: "control-racing",
-
-  storageBucket: "control-racing.firebasestorage.app",
-
-  messagingSenderId: "114488486568",
-
-  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
-
-};
 
 const app = initializeApp(firebaseConfig);
 
@@ -304,11 +292,11 @@ async function loadUsers(){
 
       <div class="user-top">
 
-        <img src="${data.foto}">
+        <img src="${escapeHTML(data.foto)}">
 
         <div>
 
-          <h2>${data.nome}</h2>
+          <h2>${escapeHTML(data.nome)}</h2>
 
           <span>#${data.rank}</span>
 
@@ -319,11 +307,11 @@ async function loadUsers(){
       <div class="user-fields">
 
         <input type="text"
-               value="${data.carro}"
+               value="${escapeHTML(data.carro)}"
                id="carro-${userId}">
 
         <input type="text"
-               value="${data.equipe}"
+               value="${escapeHTML(data.equipe)}"
                id="equipe-${userId}">
 
         <input type="text"
@@ -484,11 +472,11 @@ async function loadInscricoes(){
         <div>
 
           <h3>
-            ${data.tabletNome}
+            ${escapeHTML(data.tabletNome)}
           </h3>
 
           <span>
-            ${data.carro}
+            ${escapeHTML(data.carro)}
           </span>
         </div>
 
@@ -789,14 +777,14 @@ function loadPedidos(){
 
             <h3>
 
-              ${pedido.clienteNome}
+              ${escapeHTML(pedido.clienteNome)}
 
             </h3>
 
             <span>
 
               Vendedor:
-              ${pedido.pilotoNome}
+              ${escapeHTML(pedido.pilotoNome)}
 
             </span>
 

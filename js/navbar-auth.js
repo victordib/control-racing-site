@@ -1,28 +1,14 @@
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
+import { firebaseConfig } from "./firebase-config.js";
+
 import {
   getAuth,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* FIREBASE */
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
-
-  authDomain: "control-racing.firebaseapp.com",
-
-  projectId: "control-racing",
-
-  storageBucket: "control-racing.firebasestorage.app",
-
-  messagingSenderId: "114488486568",
-
-  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
-
-};
 
 const app = initializeApp(firebaseConfig);
 

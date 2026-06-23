@@ -196,10 +196,14 @@
 
 <!-- FIREBASE -->
 
+<script src="js/security-utils.js"></script>
+
 <script type="module">
 
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { firebaseConfig } from "./js/firebase-config.js";
 
 import {
 
@@ -225,22 +229,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* FIREBASE */
-
-const firebaseConfig = {
-
-  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
-
-  authDomain: "control-racing.firebaseapp.com",
-
-  projectId: "control-racing",
-
-  storageBucket: "control-racing.firebasestorage.app",
-
-  messagingSenderId: "114488486568",
-
-  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
-
-};
 
 const app = initializeApp(firebaseConfig);
 
@@ -533,9 +521,9 @@ async function carregarHistorico(){
 
         <div class="historico-top">
 
-          <div class="tipo ${item.tipo}">
+          <div class="tipo ${escapeHTML(item.tipo)}">
 
-            ${item.tipo}
+            ${escapeHTML(item.tipo)}
 
           </div>
 
@@ -552,13 +540,13 @@ async function carregarHistorico(){
 
           <span>
 
-            ${item.motivo}
+            ${escapeHTML(item.motivo)}
 
           </span>
 
           <small>
 
-            ${item.responsavel}
+            ${escapeHTML(item.responsavel)}
             •
             ${item.data}
 
