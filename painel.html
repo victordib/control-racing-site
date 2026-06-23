@@ -430,32 +430,6 @@ onAuthStateChanged(auth, async (user) => {
       .getElementById("pilot-photo")
       .src = data.foto;
 
-      /* STATUS */
-
-      document
-      .querySelectorAll(".stat-box strong")[0]
-      .innerText = data.status;
-
-      document
-      .getElementById("pilot-status-text")
-      .innerText = data.status;
-
-      document
-      .getElementById("statusBox")
-      .innerText = data.status;
-
-      document
-      .getElementById("pilot-role-text")
-      .innerText = data.equipe;
-
-      document
-      .getElementById("teamBox")
-      .innerText = data.equipe;
-
-      document
-      .getElementById("rankBox")
-      .innerText = "#" + data.rank;
-
     }
 
   }else{
@@ -538,6 +512,6 @@ document
 
 
 <script src="script.js"></script>
-<script type="module" src="js/login.js"></script>
+
 </body>
 </html>
