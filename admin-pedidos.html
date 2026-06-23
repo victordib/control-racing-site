@@ -22,6 +22,8 @@
 
 <!-- NAVBAR -->
 
+<div id="adminPedidosContent" style="display:none;">
+
 <nav class="navbar">
 
   <div class="logo">
@@ -180,6 +182,8 @@
 
 </section>
 
+</div>
+
 <div class="page-transition"></div>
 
 <!-- FIREBASE -->
@@ -308,6 +312,8 @@ onAuthStateChanged(auth, async(user) => {
     return;
 
   }
+
+  document.getElementById("adminPedidosContent").style.display = "block";
 
   carregarCaixa();
 

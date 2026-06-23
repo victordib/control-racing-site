@@ -23,6 +23,8 @@
 
 <body>
 
+<div id="caixaContent" style="display:none;"></div>
+
 <!-- NAVBAR -->
 
 <nav class="navbar">
@@ -189,7 +191,7 @@
   </div>
 
 </section>
-
+</div>
 <div class="page-transition"></div>
 
 <!-- FIREBASE -->
@@ -256,6 +258,8 @@ document.getElementById("historicoGrid");
 
 /* USER */
 
+let permitidoAdmin = false;
+
 let usuarioNome = "";
 
 /* AUTH */
@@ -311,6 +315,10 @@ onAuthStateChanged(auth, async(user) => {
   usuarioNome =
   data.nome;
 
+  permitidoAdmin = true;
+
+  document.getElementById("caixaContent").style.display = "block";
+
   carregarSaldo();
 
   carregarHistorico();
@@ -361,6 +369,12 @@ async function carregarSaldo(){
 document
 .getElementById("registrarBtn")
 .addEventListener("click", async() => {
+
+  if(!permitidoAdmin){
+    alert("Acesso negado.");
+    window.location.href = "painel.html";
+    return;
+  }
 
   const tipo =
   document
