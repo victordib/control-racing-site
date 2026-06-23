@@ -154,13 +154,28 @@
       snap.forEach((doc) => {
         const acesso = doc.data();
 
-        const data = acesso.data?.toDate
-          ? acesso.data.toDate().toLocaleString("pt-BR")
-          : "Sem data";
+        let dataFormatada = "Sem data";
+
+        if (acesso.data) {
+
+          if (typeof acesso.data.toDate === "function") {
+
+            dataFormatada =
+              acesso.data.toDate().toLocaleString("pt-BR");
+
+          } else if (acesso.data.seconds) {
+
+            dataFormatada =
+              new Date(acesso.data.seconds * 1000)
+              .toLocaleString("pt-BR");
+
+          }
+
+        }
 
         lista.innerHTML += `
           <tr>
-            <td>${data}</td>
+            <td>${dataFormatada}</td>
             <td>${acesso.nome || "-"}</td>
             <td>${acesso.email || "-"}</td>
             <td>${acesso.navegador || "-"}</td>

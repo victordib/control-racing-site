@@ -148,7 +148,8 @@ import {
   getDoc,
   setDoc,
   collection,
-  getDocs
+  getDocs,
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -322,6 +323,40 @@ function lerArquivoJSON(file) {
   });
 }
 
+function converterTimestamps(obj) {
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => converterTimestamps(item));
+  }
+
+  if (obj && typeof obj === "object") {
+
+    const keys = Object.keys(obj);
+
+    const pareceTimestamp =
+      keys.includes("seconds") &&
+      keys.includes("nanoseconds") &&
+      keys.length === 2;
+
+    if (pareceTimestamp) {
+      return new Timestamp(
+        obj.seconds,
+        obj.nanoseconds
+      );
+    }
+
+    const convertido = {};
+
+    for (const key in obj) {
+      convertido[key] = converterTimestamps(obj[key]);
+    }
+
+    return convertido;
+  }
+
+  return obj;
+}
+
 async function restaurarColecao(nomeColecao, documentos) {
 
   let total = 0;
@@ -332,7 +367,7 @@ async function restaurarColecao(nomeColecao, documentos) {
       continue;
     }
 
-    const dados = documentos[docId];
+    const dados = converterTimestamps(documentos[docId]);
 
     await setDoc(
       doc(db, nomeColecao, docId),
