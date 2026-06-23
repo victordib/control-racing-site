@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Backup Firebase - Control Racing</title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    body {
+      min-height: 100vh;
+      background: #050505;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    .backup-card {
+      max-width: 700px;
+      width: 100%;
+      background: rgba(5, 5, 5, 0.92);
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      border-radius: 18px;
+      padding: 35px;
+      text-align: center;
+      box-shadow: 0 0 35px rgba(0, 229, 255, 0.15);
+    }
+
+    h1 {
+      color: #00E5FF;
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #ccc;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    button {
+      background: #00E5FF;
+      color: #050505;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 8px;
+    }
+
+    .back-btn {
+      background: transparent;
+      color: #00E5FF;
+      border: 1px solid #00E5FF;
+    }
+
+    #status {
+      margin-top: 20px;
+      color: #aaa;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="backupContent" style="display:none;">
+
+  <div class="backup-card">
+
+    <h1>BACKUP FIREBASE</h1>
+
+    <p>
+      Gere um backup em JSON das principais coleções do banco de dados da Control Racing.
+    </p>
+
+    <button id="backupBtn">
+      GERAR BACKUP JSON
+    </button>
+
+    <button class="back-btn" onclick="window.location.href='admin.html'">
+      VOLTAR
+    </button>
+
+    <div id="status"></div>
+
+  </div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDaOJQBbu-XwgLkcrsiTkoiCywq9u2mNlA",
+  authDomain: "control-racing.firebaseapp.com",
+  projectId: "control-racing",
+  storageBucket: "control-racing.firebasestorage.app",
+  messagingSenderId: "114488486568",
+  appId: "1:114488486568:web:bba81c86949cf38d91f09d"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const statusBox = document.getElementById("status");
+
+let permitidoAdmin = false;
+
+onAuthStateChanged(auth, async (user) => {
+
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const userRef = doc(db, "usuarios", user.uid);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    window.location.href = "painel.html";
+    return;
+  }
+
+  const data = userSnap.data();
+
+  const permitido =
+    (
+      data.equipe === "Founder" &&
+      data.ordem === 1
+    )
+    ||
+    (
+      data.equipe === "Manager" &&
+      data.ordem === 2
+    );
+
+  if (!permitido) {
+    window.location.href = "painel.html";
+    return;
+  }
+
+  permitidoAdmin = true;
+
+  document.getElementById("backupContent").style.display = "block";
+
+});
+
+async function exportarColecao(nomeColecao) {
+
+  const snap = await getDocs(collection(db, nomeColecao));
+
+  const dados = {};
+
+  snap.forEach((docSnap) => {
+    dados[docSnap.id] = docSnap.data();
+  });
+
+  return dados;
+}
+
+document.getElementById("backupBtn").addEventListener("click", async () => {
+
+  if (!permitidoAdmin) {
+    alert("Acesso negado.");
+    window.location.href = "painel.html";
+    return;
+  }
+
+  try {
+
+    statusBox.innerText = "Gerando backup...";
+
+    const backup = {
+      geradoEm: new Date().toLocaleString("pt-BR"),
+      projeto: "Control Racing",
+      colecoes: {
+        usuarios: await exportarColecao("usuarios"),
+        pedidos: await exportarColecao("pedidos"),
+        financeiro: await exportarColecao("financeiro"),
+        coletas: await exportarColecao("coletas"),
+        playoffs: await exportarColecao("playoffs"),
+        acessos: await exportarColecao("acessos"),
+        sistema: await exportarColecao("sistema"),
+        inscricoes: await exportarColecao("inscricoes"),
+        corridas: await exportarColecao("corridas")
+      }
+    };
+
+    const json = JSON.stringify(backup, null, 2);
+
+    const blob = new Blob([json], {
+      type: "application/json"
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const dataArquivo = new Date()
+      .toISOString()
+      .slice(0, 10);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = `backup-control-racing-${dataArquivo}.json`;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+    statusBox.innerText = "Backup gerado com sucesso.";
+
+  } catch (error) {
+
+    console.error(error);
+
+    statusBox.innerText = "Erro ao gerar backup.";
+
+    alert("Erro ao gerar backup: " + error.message);
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>
